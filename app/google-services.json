@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884287377088",
+    "project_id": "klobuddy",
+    "storage_bucket": "klobuddy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884287377088:android:8755a422258dbc9067a725",
+        "android_client_info": {
+          "package_name": "de.xuuniversity.co3.klobuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAazacjsyAIQ-PUN4OmAzzQv5r1BzYr48g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
