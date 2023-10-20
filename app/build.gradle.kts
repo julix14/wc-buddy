@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "de.xuuniversity.co3.klobuddy"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "de.xuuniversity.co3.klobuddy"
