@@ -11,6 +11,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
@@ -69,16 +70,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isZoomGesturesEnabled = true
+        mMap.uiSettings.isScrollGesturesEnabled = true
+        mMap.uiSettings.isRotateGesturesEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
+        mMap.uiSettings.isTiltGesturesEnabled = false
+
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+
 
         val location : LatLng = if(currentLocation != null){
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude);
         } else {
             DEFAULT_LOCATION
         }
-
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
         mMap.addMarker(MarkerOptions().position(location).title("Current Location"))
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
-        // mMap.moveCamera(CameraUpdateFactory.zoomTo(10F))
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
