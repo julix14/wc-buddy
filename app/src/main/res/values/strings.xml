@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">KloBuddy</string>
     <string name="title_activity_maps">MapsActivity</string>
+
+
+    <string name="error_location_permission_denied">You denied the location permission</string>
 </resources>
