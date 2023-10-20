@@ -2,4 +2,14 @@
 plugins {
     id("com.android.application") version "8.1.2" apply false
     id("org.jetbrains.kotlin.android") version "1.9.0" apply false
+    id("org.sonarqube") version "4.4.1.3373"
+
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "julix14_wc-buddy")
+        property("sonar.organization", "klobuddy")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
