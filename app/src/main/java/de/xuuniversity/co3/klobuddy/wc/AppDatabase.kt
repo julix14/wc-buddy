@@ -8,5 +8,6 @@ import androidx.room.RoomDatabase
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract  fun wcDao(): WcDao
+    abstract fun wcDao(): WcDao
+
 }
