@@ -11,8 +11,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportFragmentManager.beginTransaction()
-            .replace(R.id.frameLayout, FavoritesFragment())
+            .replace(R.id.frameLayout, MapsFragment())
             .commit()
+        binding.bottomNavigationView.menu.findItem(R.id.action_menu_map).isChecked = true
 
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
