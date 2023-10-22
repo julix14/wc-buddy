@@ -11,9 +11,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMapsBinding
@@ -64,7 +64,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .findFragmentById(R.id.map) as SupportMapFragment
                 mapFragment.getMapAsync(this)
             }
-
         }
     }
 
@@ -79,17 +78,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-
         val location : LatLng = if(currentLocation != null){
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude);
         } else {
             DEFAULT_LOCATION
         }
+
+
+
         mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
-        mMap.addMarker(MarkerOptions().position(location).title("Current Location"))
-
+        mMap.addMarker(MarkerOptions()
+            .position(location)
+            //USe XML as Icon
+            .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(this, R.drawable.outline_my_location_24)))
+            .title("Current Location")
+        )
         mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
