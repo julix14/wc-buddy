@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface WcDao {
+fun interface WcDao {
     @Query("SELECT * FROM WcEntity")
     suspend fun getAll(): List<WcEntity>
 }
