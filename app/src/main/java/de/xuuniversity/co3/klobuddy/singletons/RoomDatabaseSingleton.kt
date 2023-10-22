@@ -15,7 +15,7 @@ object RoomDatabaseSingleton {
             applicationContext,
             AppDatabase::class.java, "WcEntity"
         )
-            .createFromAsset("database/App.db")
+            .createFromAsset("database/PopulationDatabase.db")
             .build()
 
         return db as AppDatabase
