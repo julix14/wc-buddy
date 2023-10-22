@@ -66,7 +66,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if(location != null) {
                 currentLocation = location
                 val mapFragment = supportFragmentManager
-                    .findFragmentById(R.id.map) as SupportMapFragment
+                    .findFragmentById(R.id.activity_map) as SupportMapFragment
                 mapFragment.getMapAsync(this)
             }
         }
