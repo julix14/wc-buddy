@@ -24,7 +24,9 @@ class TestActivity : AppCompatActivity() {
                 Room.databaseBuilder(
                     applicationContext,
                     AppDatabase::class.java, "WcEntity"
-                ).build()
+                )
+                .createFromAsset("database/App.db")
+                .build()
             }
 
             val wcDao = db.wcDao()
