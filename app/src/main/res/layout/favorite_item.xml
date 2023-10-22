@@ -13,7 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/favorites_name"
-            android:text="Name"
+            android:text="@string/name"
             android:layout_marginBottom="7dp"
             android:layout_marginTop="7dp"
             android:textSize="20sp"
@@ -28,9 +28,8 @@
             android:textSize="20sp"
             android:layout_marginBottom="7dp"
             android:layout_marginTop="7dp"
-            android:text="Rating"
+            android:text="@string/rating"
             android:layout_weight="1"
-            android:layout_toEndOf="@id/favorites_name"
             />
         <ImageButton
             android:layout_width="wrap_content"

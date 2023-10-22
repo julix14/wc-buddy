@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00BCD4"
     tools:context=".FavoritesFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recycler_favorites"/>
+        android:id="@+id/recycler_favorites"
+        tools:listitem="@layout/favorite_item"/>
 
 </FrameLayout>

@@ -6,4 +6,6 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="error_location_permission_denied">You denied the location permission</string>
     <string name="favorites_view_button_start_navigation">Start navigation</string>
+    <string name="rating">Rating</string>
+    <string name="name">Name</string>
 </resources>
