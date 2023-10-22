@@ -6,6 +6,8 @@ import android.util.Log
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.wc.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +22,7 @@ class TestActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             // This code will run on the background thread
+            /*
             val db = withContext(Dispatchers.IO) {
                 Room.databaseBuilder(
                     applicationContext,
@@ -28,6 +31,11 @@ class TestActivity : AppCompatActivity() {
                 .createFromAsset("database/App.db")
                 .build()
             }
+            */
+
+            val db = RoomDatabaseSingleton.getDatabase(applicationContext)
+
+            Log.d("WcDao", db.toString())
 
             val wcDao = db.wcDao()
             val allWcs = withContext(Dispatchers.IO) {
