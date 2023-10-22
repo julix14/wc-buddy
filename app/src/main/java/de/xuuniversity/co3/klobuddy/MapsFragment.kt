@@ -1,6 +1,7 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -20,6 +22,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 const val FINE_PERMISSION_CODE = 1
 
@@ -100,6 +105,23 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .title("Current Location")
         )
         mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+
+        lifecycleScope.launch {
+            val db = RoomDatabaseSingleton.getDatabase(activity as Context)
+
+            val wcDao = db.wcDao()
+            val allWcs = async {
+                wcDao.getAll()
+            }
+
+            for (wc in allWcs.await()) {
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(wc.latitude, wc.longitude))
+                    .title(wc.description)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
+                )
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
