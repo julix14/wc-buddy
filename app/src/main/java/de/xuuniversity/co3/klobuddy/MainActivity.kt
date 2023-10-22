@@ -2,6 +2,7 @@ package de.xuuniversity.co3.klobuddy
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -18,28 +19,27 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.action_menu_map -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.frameLayout, MapsFragment())
-                        .commit()
+                    replaceFragment(MapsFragment())
                     true
                 }
 
                 R.id.action_menu_favorites -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.frameLayout, FavoritesFragment())
-                        .commit()
+                    replaceFragment(FavoritesFragment())
                     true
                 }
 
                 R.id.action_menu_profile -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.frameLayout, ProfileFragment())
-                        .commit()
+                    replaceFragment(ProfileFragment())
                     true
                 }
 
                 else -> false
             }
         }
+    }
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frameLayout, fragment)
+            .commit()
     }
 }

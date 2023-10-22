@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import de.xuuniversity.co3.klobuddy.wc.WcEntity
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -56,4 +59,31 @@ class FavoritesFragment : Fragment() {
                 }
             }
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+
+        val recyclerView: RecyclerView = view.findViewById(R.id.recycler_favorites)
+
+
+        val testItems = arrayOf(
+            WcEntity(0, "Test 1", 1.0, 1.0),
+            WcEntity(1, "Test 2", 2.0, 2.0),
+            WcEntity(2, "Test 3", 3.0, 3.0),
+            WcEntity(3, "Test 4", 4.0, 4.0),
+            WcEntity(4, "Test 5", 5.0, 5.0),
+            WcEntity(5, "Test 6", 6.0, 6.0),
+            WcEntity(6, "Test 7", 7.0, 7.0),
+            WcEntity(7, "Test 8", 8.0, 8.0),
+            WcEntity(8, "Test 9", 9.0, 9.0),
+            WcEntity(9, "Test 10", 10.0, 10.0),
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = FavoritesAdapter(testItems, requireContext())
+
+    }
+
 }
