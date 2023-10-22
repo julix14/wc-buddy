@@ -22,8 +22,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
-import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
-import kotlinx.coroutines.async
+import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 
 const val FINE_PERMISSION_CODE = 1
@@ -107,14 +106,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
 
         lifecycleScope.launch {
-            val db = RoomDatabaseSingleton.getDatabase(activity as Context)
+            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
 
-            val wcDao = db.wcDao()
-            val allWcs = async {
-                wcDao.getAllReduced()
-            }
-
-            for (wc in allWcs.await()) {
+            for (wc in allReducedWcEntity){
                 mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
