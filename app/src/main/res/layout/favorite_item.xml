@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
@@ -30,19 +31,26 @@
             android:layout_marginTop="7dp"
             android:text="@string/rating"
             android:layout_weight="1"
+            android:gravity="start"
+            app:drawableLeftCompat="@drawable/outline_star_24"
+            android:drawablePadding="5dp"
             />
+
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/icon_selection_start_navigation"
             android:id="@+id/favorites_start_navigation"
-            android:layout_weight="1"
+            android:layout_weight="0.2"
             android:layout_marginEnd="10dp"
-            android:contentDescription="@string/favorites_view_button_start_navigation" />
+            android:contentDescription="@string/favorites_view_button_start_navigation"
+            android:background="@color/white"
+            android:padding="10dp"
+            android:layout_gravity="center" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_below="@id/favorites_linear_layout"
-        android:background="#DAD8D8"/>
+        android:background="#DAD8D8" />
 </RelativeLayout>

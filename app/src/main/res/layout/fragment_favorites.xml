@@ -4,11 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".FavoritesFragment">
-
-    <androidx.recyclerview.widget.RecyclerView
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/your_favorites"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_favorites"
-        tools:listitem="@layout/favorite_item"/>
+        android:layout_width="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/favorite_item" />
 
 </FrameLayout>

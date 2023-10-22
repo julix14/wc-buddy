@@ -8,4 +8,6 @@
     <string name="favorites_view_button_start_navigation">Start navigation</string>
     <string name="rating">Rating</string>
     <string name="name">Name</string>
+    <string name="your_favorites">Your Favorites:</string>
+    <string name="star">Star</string>
 </resources>
