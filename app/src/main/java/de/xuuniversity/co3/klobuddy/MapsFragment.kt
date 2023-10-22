@@ -111,7 +111,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             val wcDao = db.wcDao()
             val allWcs = async {
-                wcDao.getAll()
+                wcDao.getAllReduced()
             }
 
             for (wc in allWcs.await()) {

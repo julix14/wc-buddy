@@ -24,8 +24,9 @@ class Test : AppCompatActivity() {
                     lifecycleScope.launch {
                         val db = RoomDatabaseSingleton.getDatabase(applicationContext)
 
+
                         var wcEntity = WcEntity(
-                            document.id.toInt(),
+                            document.id,
                             document.data["description"].toString(),
                             document.data["latitude"].toString().toDouble(),
                             document.data["longitude"].toString().toDouble()
@@ -33,6 +34,8 @@ class Test : AppCompatActivity() {
 
                         val dao = db.wcDao()
                         val wcDao = dao.upsertWcEntity(wcEntity)
+
+
 
                         Log.d("TEST", "${document.id} => ${document.data}")
 
