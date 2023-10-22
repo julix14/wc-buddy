@@ -22,7 +22,6 @@ import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-
 const val FINE_PERMISSION_CODE = 1
 //Coordinates of Berlin
 const val DEFAULT_LATITUDE = 52.519733068718935
@@ -94,6 +93,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
         mMap.addMarker(MarkerOptions()
             .position(location)
+            //Use XML as Icon
             .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(this, R.drawable.outline_my_location_24)))
             .title("Current Location")
         )
