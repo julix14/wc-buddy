@@ -16,11 +16,13 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
@@ -98,6 +100,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isTiltGesturesEnabled = false
+        mMap.setMaxZoomPreference(17f)
+        mMap.setMinZoomPreference(12f)
+        mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
