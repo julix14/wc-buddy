@@ -69,16 +69,16 @@ class FavoritesFragment : Fragment() {
 
 
         val testItems = arrayOf(
-            WcEntity(0, "Test 1", 1.0, 1.0),
-            WcEntity(1, "Test 2", 2.0, 2.0),
-            WcEntity(2, "Test 3", 3.0, 3.0),
-            WcEntity(3, "Test 4", 4.0, 4.0),
-            WcEntity(4, "Test 5", 5.0, 5.0),
-            WcEntity(5, "Test 6", 6.0, 6.0),
-            WcEntity(6, "Test 7", 7.0, 7.0),
-            WcEntity(7, "Test 8", 8.0, 8.0),
-            WcEntity(8, "Test 9", 9.0, 9.0),
-            WcEntity(9, "Test 10", 10.0, 10.0),
+            WcEntity("bt_0", "Test 1", 1.0, 1.0),
+            WcEntity("bt_1", "Test 2", 2.0, 2.0),
+            WcEntity("bt_2", "Test 3", 3.0, 3.0),
+            WcEntity("bt_3", "Test 4", 4.0, 4.0),
+            WcEntity("bt_4", "Test 5", 5.0, 5.0),
+            WcEntity("bt_5", "Test 7", 7.0, 7.0),
+            WcEntity("bt_6", "Test 6", 6.0, 6.0),
+            WcEntity("bt_7", "Test 8", 8.0, 8.0),
+            WcEntity("bt_8", "Test 9", 9.0, 9.0),
+            WcEntity("bt_9", "Test 10", 10.0, 10.0),
         )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
