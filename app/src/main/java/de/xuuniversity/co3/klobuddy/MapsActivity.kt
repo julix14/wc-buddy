@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -17,6 +19,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMapsBinding
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 const val FINE_PERMISSION_CODE = 1;
 //Coordinates of Berlin
@@ -85,7 +91,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
-
         mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
         mMap.addMarker(MarkerOptions()
             .position(location)
@@ -94,6 +99,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .title("Current Location")
         )
         mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+
+        lifecycleScope.launch {
+
+            val db = RoomDatabaseSingleton.getDatabase(applicationContext)
+
+            val wcDao = db.wcDao()
+            val allWcs = withContext(Dispatchers.IO) {
+                wcDao.getAll()
+            }
+
+            for (wc in allWcs) {
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(wc.latitude, wc.longitude))
+                    .title(wc.description)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(this@MapsActivity, R.drawable.outline_wc_24)))
+                )
+            }
+
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
