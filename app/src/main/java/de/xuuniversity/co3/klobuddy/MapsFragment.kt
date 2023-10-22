@@ -19,9 +19,11 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 
@@ -37,7 +39,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
 
-    override fun onCreateView(
+    private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
+
+    override fun onCreateView (
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
@@ -47,8 +51,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         getLastLocation()
+    }
+
+
+    override fun onPause() {
+        StatesSingleton.cameraPosition = mMap.cameraPosition
+        super.onPause()
     }
 
     private fun getLastLocation() {
@@ -96,14 +107,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             DEFAULT_LOCATION
         }
 
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
+        if(cameraPosition != null)
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition!!))
+        else {
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+        }
+
         mMap.addMarker(MarkerOptions()
             .position(location)
-            // Use XML as Icon
             .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(requireContext(), R.drawable.outline_my_location_24)))
             .title("Current Location")
         )
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
 
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
