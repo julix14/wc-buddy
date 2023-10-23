@@ -47,8 +47,8 @@ object WcRepository {
             }
     }
 
-    suspend fun getAllFavoritesByUserID(activity: Activity, userID: Int): List<WcEntity> {
-        val db = RoomDatabaseSingleton.getDatabase(activity as Context)
+    suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
+        val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
 
         return wcDao.getAllFavoritesByUserID(userID)
