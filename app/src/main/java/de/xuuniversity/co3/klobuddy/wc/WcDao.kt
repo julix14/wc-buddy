@@ -5,6 +5,8 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import de.xuuniversity.co3.klobuddy.favorite.WcFavoriteEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Dao
 interface WcDao {
@@ -19,10 +21,25 @@ interface WcDao {
     @Upsert
     suspend fun upsertWcEntity(wcEntity: WcEntity)
 
+    @Query("SELECT * FROM WcEntity")
+    fun getAllFlow(): Flow<List<WcEntity>>
+
     @Query("""
         SELECT WcEntity.* FROM WcEntity
         JOIN FavoriteEntity ON WcEntity.lavatoryID = FavoriteEntity.lavatoryID
         WHERE FavoriteEntity.userID = :userID
     """)
     suspend fun getAllFavoritesByUserID(userID: Int): List<WcEntity>
+
+    @Query("""
+        SELECT WcEntity.* FROM WcEntity
+        JOIN FavoriteEntity ON WcEntity.lavatoryID = FavoriteEntity.lavatoryID
+        WHERE FavoriteEntity.userID = :userID
+    """)
+    fun getAllFavoritesByUserIDFlow(userID: Int): Flow<List<WcEntity>>
+
+    fun getAllFavoritesByUserIDFlowDistinct(userID: Int): Flow<List<WcEntity>>{
+        return getAllFavoritesByUserIDFlow(userID).distinctUntilChanged()
+    }
+
 }
