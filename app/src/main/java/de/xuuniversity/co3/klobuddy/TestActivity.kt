@@ -18,12 +18,14 @@ class TestActivity : AppCompatActivity() {
         setContentView(R.layout.activity_test)
 
         lifecycleScope.launch {
-            val db = RoomDatabaseSingleton.getDatabase(applicationContext)
-            val wcDao = db.wcDao()
-            val favorites = wcDao.getFavorites()
+
+
+
+            val favorites = WcRepository.getAllFavoritesByUserID(this@TestActivity, 1)
+
 
             for (favorite in favorites) {
-                Log.d("DEBUG", favorite.favorites.toString())
+                Log.d("DEBUG", favorite.toString())
             }
 
         }

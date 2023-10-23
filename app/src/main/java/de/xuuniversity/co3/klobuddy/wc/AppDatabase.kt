@@ -1,6 +1,5 @@
 package de.xuuniversity.co3.klobuddy.wc
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
@@ -12,5 +11,4 @@ import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun wcDao(): WcDao
-
 }

@@ -19,7 +19,10 @@ interface WcDao {
     @Upsert
     suspend fun upsertWcEntity(wcEntity: WcEntity)
 
-    @Transaction
-    @Query("SELECT * FROM WcEntity")
-    suspend fun getFavorites(): List<WcFavoriteEntity>
+    @Query("""
+        SELECT WcEntity.* FROM WcEntity
+        JOIN FavoriteEntity ON WcEntity.lavatoryID = FavoriteEntity.lavatoryID
+        WHERE FavoriteEntity.userID = :userID
+    """)
+    suspend fun getAllFavoritesByUserID(userID: Int): List<WcEntity>
 }
