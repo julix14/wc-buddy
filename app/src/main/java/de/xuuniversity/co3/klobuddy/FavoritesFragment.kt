@@ -8,9 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
 // TODO: Rename parameter arguments, choose names that match
@@ -67,21 +68,19 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_favorites)
 
-        var testItems: List<WcEntity>? = null
-
-        runBlocking {
-            launch {
-                testItems = WcRepository.getAllFavoritesByUserID(context as Context, 1)
-            }
+        /*
+        val favoriteWCEntities : List<WcEntity> = runBlocking {
+            val favorites = async { WcRepository.getAllFavoritesByUserID(activity as Context, 1) }
+            favorites.await()
         }
+        */
+
 
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = FavoritesAdapter(testItems as List<WcEntity>, requireContext())
+        recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
 
     }
 
