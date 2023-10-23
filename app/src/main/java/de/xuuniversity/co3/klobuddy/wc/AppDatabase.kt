@@ -3,10 +3,11 @@ package de.xuuniversity.co3.klobuddy.wc
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 
 @Database(
     version = 1,
-    entities = [WcEntity::class],
+    entities = [WcEntity::class, FavoriteEntity::class],
     views = [ReducedWcEntity::class],
 )
 abstract class AppDatabase : RoomDatabase() {

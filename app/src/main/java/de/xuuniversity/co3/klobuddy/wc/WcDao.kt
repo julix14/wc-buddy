@@ -2,7 +2,9 @@ package de.xuuniversity.co3.klobuddy.wc
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
+import de.xuuniversity.co3.klobuddy.favorite.WcFavoriteEntity
 
 @Dao
 interface WcDao {
@@ -16,4 +18,8 @@ interface WcDao {
 
     @Upsert
     suspend fun upsertWcEntity(wcEntity: WcEntity)
+
+    @Transaction
+    @Query("SELECT * FROM WcEntity")
+    suspend fun getFavorites(): List<WcFavoriteEntity>
 }

@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KloBuddy"
         tools:targetApi="31">
+        <activity
+            android:name=".TestActivity"
+            android:exported="true" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
