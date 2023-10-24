@@ -2,16 +2,20 @@ package de.xuuniversity.co3.klobuddy
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 // TODO: Rename parameter arguments, choose names that match
@@ -69,18 +73,26 @@ class FavoritesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_favorites)
-
-        /*
-        val favoriteWCEntities : List<WcEntity> = runBlocking {
-            val favorites = async { WcRepository.getAllFavoritesByUserID(activity as Context, 1) }
-            favorites.await()
-        }
-        */
-
-
-
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
+
+        lifecycleScope.launch {
+
+            val db = RoomDatabaseSingleton.getDatabase(activity as Context)
+            val wcDao = db.wcDao()
+
+            val flow = wcDao.getAllFavoritesByUserIDFlowDistinct(1)
+
+            flow.collect {
+                Log.d("DEBUG", it.toString())
+                StatesSingleton.favoriteWCEntities = it
+                recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
+            }
+
+        }
+
+
+
 
     }
 
