@@ -12,11 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
-import de.xuuniversity.co3.klobuddy.wc.WcEntity
-import de.xuuniversity.co3.klobuddy.wc.WcRepository
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -76,6 +72,7 @@ class FavoritesFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
 
+        //Watch for changes in the database and updates the recyclerview
         lifecycleScope.launch {
 
             val db = RoomDatabaseSingleton.getDatabase(activity as Context)
@@ -84,16 +81,9 @@ class FavoritesFragment : Fragment() {
             val flow = wcDao.getAllFavoritesByUserIDFlowDistinct(1)
 
             flow.collect {
-                Log.d("DEBUG", it.toString())
                 StatesSingleton.favoriteWCEntities = it
                 recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
             }
-
         }
-
-
-
-
     }
-
 }
