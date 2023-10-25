@@ -13,7 +13,7 @@ object RoomDatabaseSingleton {
 
         db = Room.databaseBuilder(
             applicationContext,
-            AppDatabase::class.java, "WcEntity"
+            AppDatabase::class.java, "WcEntity",
         )
             .createFromAsset("database/PopulationDatabase.db")
             .build()

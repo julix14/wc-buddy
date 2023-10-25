@@ -10,7 +10,7 @@ import de.xuuniversity.co3.klobuddy.wc.WcEntity
 
 
 class FavoritesAdapter(
-    private val items: Array<WcEntity>,
+    private val items: List<WcEntity>,
     private val context: Context
 ): RecyclerView.Adapter<FavoritesViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoritesViewHolder {

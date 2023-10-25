@@ -47,4 +47,11 @@ object WcRepository {
             }
     }
 
+    suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        return wcDao.getAllFavoritesByUserID(userID)
+    }
+
 }

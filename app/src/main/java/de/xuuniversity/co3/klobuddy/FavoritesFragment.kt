@@ -1,13 +1,17 @@
 package de.xuuniversity.co3.klobuddy
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import de.xuuniversity.co3.klobuddy.wc.WcEntity
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import kotlinx.coroutines.launch
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -63,27 +67,22 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_favorites)
-
-
-        val testItems = arrayOf(
-            WcEntity("bt_0", "Test 1", 1.0, 1.0),
-            WcEntity("bt_1", "Test 2", 2.0, 2.0),
-            WcEntity("bt_2", "Test 3", 3.0, 3.0),
-            WcEntity("bt_3", "Test 4", 4.0, 4.0),
-            WcEntity("bt_4", "Test 5", 5.0, 5.0),
-            WcEntity("bt_5", "Test 7", 7.0, 7.0),
-            WcEntity("bt_6", "Test 6", 6.0, 6.0),
-            WcEntity("bt_7", "Test 8", 8.0, 8.0),
-            WcEntity("bt_8", "Test 9", 9.0, 9.0),
-            WcEntity("bt_9", "Test 10", 10.0, 10.0),
-        )
-
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = FavoritesAdapter(testItems, requireContext())
+        recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
 
+        //Watch for changes in the database and updates the recyclerview
+        lifecycleScope.launch {
+
+            val db = RoomDatabaseSingleton.getDatabase(activity as Context)
+            val wcDao = db.wcDao()
+
+            val flow = wcDao.getAllFavoritesByUserIDFlowDistinct(1)
+
+            flow.collect {
+                StatesSingleton.favoriteWCEntities = it
+                recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
+            }
+        }
     }
-
 }
