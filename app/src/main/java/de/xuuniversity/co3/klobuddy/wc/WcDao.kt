@@ -2,9 +2,7 @@ package de.xuuniversity.co3.klobuddy.wc
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Upsert
-import de.xuuniversity.co3.klobuddy.favorite.WcFavoriteEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
