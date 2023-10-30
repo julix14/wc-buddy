@@ -20,18 +20,22 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import de.xuuniversity.co3.klobuddy.wc.ReducedWcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
+import kotlin.math.*
 
 const val FINE_PERMISSION_CODE = 1
 
 // Coordinates of Berlin
 private val DEFAULT_LOCATION = LatLng(52.519733068718935, 13.404793124702566)
+private val RADIUS = 1.0
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -124,10 +128,19 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .title("Current Location")
         )
 
+        mMap.addCircle(CircleOptions()
+            .radius(RADIUS * 1000)
+            .center(location)
+
+        )
+
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
 
-            for (wc in allReducedWcEntity){
+            val filteredReducedWcEntities = filterLocations(allReducedWcEntity)
+
+            for (wc in filteredReducedWcEntities){
+
                 mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
@@ -147,5 +160,31 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 Toast.makeText(requireContext(), R.string.error_location_permission_denied, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun filterLocations(locations: List<ReducedWcEntity>): List<ReducedWcEntity> {
+        val resultLocations = mutableListOf<ReducedWcEntity>()
+
+        val baseLatRad = Math.toRadians(DEFAULT_LOCATION.latitude)
+        val baseLonRad = Math.toRadians(DEFAULT_LOCATION.longitude)
+
+        for (location in locations) {
+            val latRad = Math.toRadians(location.latitude)
+            val lonRad = Math.toRadians(location.longitude)
+
+            val deltaLat = latRad - baseLatRad
+            val deltaLon = lonRad - baseLonRad
+
+            val a = sin(deltaLat / 2).pow(2) + cos(baseLatRad) * cos(latRad) * sin(deltaLon / 2).pow(2)
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+            val distanceInKilometers = 6371 * c // Radius of the Earth in kilometers
+
+            if (distanceInKilometers <= RADIUS) {
+                resultLocations.add(location)
+            }
+        }
+
+        return resultLocations
     }
 }
