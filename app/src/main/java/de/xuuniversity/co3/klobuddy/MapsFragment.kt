@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
+    private var placedMarker : List<ReducedWcEntity> = listOf()
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
 
@@ -106,6 +108,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setMaxZoomPreference(17f)
         mMap.setMinZoomPreference(12f)
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
+        mMap.setOnCameraMoveListener {
+            placeMarker(mMap.cameraPosition.target)
+        }
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
@@ -128,26 +133,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .title("Current Location")
         )
 
-        mMap.addCircle(CircleOptions()
-            .radius(RADIUS * 1000)
-            .center(location)
-
-        )
-
-        lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
-
-            val filteredReducedWcEntities = filterLocations(allReducedWcEntity)
-
-            for (wc in filteredReducedWcEntities){
-
-                mMap.addMarker(MarkerOptions()
-                    .position(LatLng(wc.latitude, wc.longitude))
-                    .title(wc.description)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
-                )
-            }
-        }
+        placeMarker(DEFAULT_LOCATION)
     }
 
     @Deprecated("Deprecated in Java")
@@ -162,11 +148,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun filterLocations(locations: List<ReducedWcEntity>): List<ReducedWcEntity> {
+    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng): List<ReducedWcEntity> {
         val resultLocations = mutableListOf<ReducedWcEntity>()
 
-        val baseLatRad = Math.toRadians(DEFAULT_LOCATION.latitude)
-        val baseLonRad = Math.toRadians(DEFAULT_LOCATION.longitude)
+        val baseLatRad = Math.toRadians(cameraPosition.latitude)
+        val baseLonRad = Math.toRadians(cameraPosition.longitude)
 
         for (location in locations) {
             val latRad = Math.toRadians(location.latitude)
@@ -186,5 +172,24 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         return resultLocations
+    }
+
+    private fun placeMarker(cameraPosition: LatLng){
+        lifecycleScope.launch {
+            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
+            val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
+            val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition)
+
+            for (wc in filteredReducedWcEntities){
+
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(wc.latitude, wc.longitude))
+                    .title(wc.description)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
+                )
+            }
+
+            placedMarker += filteredReducedWcEntities;
+        }
     }
 }
