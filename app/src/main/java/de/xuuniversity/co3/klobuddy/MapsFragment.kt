@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +20,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
@@ -33,10 +31,10 @@ import kotlinx.coroutines.launch
 import kotlin.math.*
 
 const val FINE_PERMISSION_CODE = 1
+const val RADIUS = 1.0
 
 // Coordinates of Berlin
-private val DEFAULT_LOCATION = LatLng(52.519733068718935, 13.404793124702566)
-private val RADIUS = 1.0
+private val _defaultLocation = LatLng(52.519733068718935, 13.404793124702566)
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -109,7 +107,27 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setMinZoomPreference(12f)
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
         mMap.setOnCameraMoveListener {
-            placeMarker(mMap.cameraPosition.target)
+            val zoomLevel = mMap.cameraPosition.zoom
+            val radius: Double
+            when {
+                zoomLevel < 13 -> {
+                    radius = RADIUS * 11
+                }
+                zoomLevel < 14 -> {
+                    radius = RADIUS * 7
+                }
+                zoomLevel < 15 -> {
+                    radius = RADIUS * 4
+                }
+                zoomLevel < 16 -> {
+                    radius = RADIUS * 2
+                }
+                else -> {
+                    radius = RADIUS
+                }
+            }
+
+            placeMarker(mMap.cameraPosition.target, radius)
         }
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
@@ -117,7 +135,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         val location: LatLng = if (currentLocation != null) {
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
         } else {
-            DEFAULT_LOCATION
+            _defaultLocation
         }
 
         if(cameraPosition != null)
@@ -133,7 +151,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .title("Current Location")
         )
 
-        placeMarker(DEFAULT_LOCATION)
+        placeMarker(_defaultLocation, RADIUS)
     }
 
     @Deprecated("Deprecated in Java")
@@ -148,7 +166,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng): List<ReducedWcEntity> {
+    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng, radius: Double): List<ReducedWcEntity> {
         val resultLocations = mutableListOf<ReducedWcEntity>()
 
         val baseLatRad = Math.toRadians(cameraPosition.latitude)
@@ -166,7 +184,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             val distanceInKilometers = 6371 * c // Radius of the Earth in kilometers
 
-            if (distanceInKilometers <= RADIUS) {
+            if (distanceInKilometers <= radius) {
                 resultLocations.add(location)
             }
         }
@@ -174,14 +192,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         return resultLocations
     }
 
-    private fun placeMarker(cameraPosition: LatLng){
+    private fun placeMarker(cameraPosition: LatLng, radius: Double){
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
             val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
-            val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition)
+            val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 
             for (wc in filteredReducedWcEntities){
-
                 mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
@@ -189,7 +206,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 )
             }
 
-            placedMarker += filteredReducedWcEntities;
+            placedMarker += filteredReducedWcEntities
         }
     }
 }
