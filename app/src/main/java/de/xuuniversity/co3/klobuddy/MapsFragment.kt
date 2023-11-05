@@ -25,13 +25,16 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import de.xuuniversity.co3.klobuddy.wc.ReducedWcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
+import kotlin.math.*
 
 const val FINE_PERMISSION_CODE = 1
+const val RADIUS = 1.0
 
 // Coordinates of Berlin
-private val DEFAULT_LOCATION = LatLng(52.519733068718935, 13.404793124702566)
+private val _defaultLocation = LatLng(52.519733068718935, 13.404793124702566)
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -39,6 +42,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
+    private var placedMarker : List<ReducedWcEntity> = listOf()
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
 
@@ -102,13 +106,36 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setMaxZoomPreference(17f)
         mMap.setMinZoomPreference(12f)
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
+        mMap.setOnCameraMoveListener {
+            val zoomLevel = mMap.cameraPosition.zoom
+            val radius: Double
+            when {
+                zoomLevel < 13 -> {
+                    radius = RADIUS * 11
+                }
+                zoomLevel < 14 -> {
+                    radius = RADIUS * 7
+                }
+                zoomLevel < 15 -> {
+                    radius = RADIUS * 4
+                }
+                zoomLevel < 16 -> {
+                    radius = RADIUS * 2
+                }
+                else -> {
+                    radius = RADIUS
+                }
+            }
+
+            placeMarker(mMap.cameraPosition.target, radius)
+        }
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
         val location: LatLng = if (currentLocation != null) {
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
         } else {
-            DEFAULT_LOCATION
+            _defaultLocation
         }
 
         if(cameraPosition != null)
@@ -124,17 +151,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .title("Current Location")
         )
 
-        lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
-
-            for (wc in allReducedWcEntity){
-                mMap.addMarker(MarkerOptions()
-                    .position(LatLng(wc.latitude, wc.longitude))
-                    .title(wc.description)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
-                )
-            }
-        }
+        placeMarker(_defaultLocation, RADIUS)
     }
 
     @Deprecated("Deprecated in Java")
@@ -146,6 +163,50 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             } else {
                 Toast.makeText(requireContext(), R.string.error_location_permission_denied, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng, radius: Double): List<ReducedWcEntity> {
+        val resultLocations = mutableListOf<ReducedWcEntity>()
+
+        val baseLatRad = Math.toRadians(cameraPosition.latitude)
+        val baseLonRad = Math.toRadians(cameraPosition.longitude)
+
+        for (location in locations) {
+            val latRad = Math.toRadians(location.latitude)
+            val lonRad = Math.toRadians(location.longitude)
+
+            val deltaLat = latRad - baseLatRad
+            val deltaLon = lonRad - baseLonRad
+
+            val a = sin(deltaLat / 2).pow(2) + cos(baseLatRad) * cos(latRad) * sin(deltaLon / 2).pow(2)
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+            val distanceInKilometers = 6371 * c // Radius of the Earth in kilometers
+
+            if (distanceInKilometers <= radius) {
+                resultLocations.add(location)
+            }
+        }
+
+        return resultLocations
+    }
+
+    private fun placeMarker(cameraPosition: LatLng, radius: Double){
+        lifecycleScope.launch {
+            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
+            val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
+            val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
+
+            for (wc in filteredReducedWcEntities){
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(wc.latitude, wc.longitude))
+                    .title(wc.description)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
+                )
+            }
+
+            placedMarker += filteredReducedWcEntities
         }
     }
 }
