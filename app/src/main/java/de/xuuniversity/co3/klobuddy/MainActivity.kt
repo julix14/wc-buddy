@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.action_menu_profile -> {
-                    replaceFragment(ProfileFragment())
+                    replaceFragment(PreferencesFragment())
                     binding.bottomNavigationView.menu.findItem(R.id.action_menu_profile).isEnabled = false
                     true
                 }
