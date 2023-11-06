@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/preferences_general_category_title">
+    <PreferenceCategory
+        android:title="@string/preferences_general_category_title"
+        app:iconSpaceReserved="false">
         <SwitchPreference
+            app:iconSpaceReserved="false"
             android:title="@string/preferences_dark_mode_title"
             android:defaultValue="false"
             android:summary="@string/preferences_dark_mode_description"
-            android:key="@string/preferences_dark_mode_key"></SwitchPreference>
+            android:key="@string/preferences_dark_mode_key" />
+        <ListPreference
+            app:iconSpaceReserved="false"
+            android:title="@string/preferences_zoom_level_title"
+            android:summary="@string/preferences_zoom_level_description"
+            android:key="@string/preferences_zoom_level_key"
+            app:entries="@array/preferences_zoom_level_entries"
+            app:entryValues="@array/preferences_zoom_level_keys"
+            app:defaultValue="13" />
 
     </PreferenceCategory>
 
