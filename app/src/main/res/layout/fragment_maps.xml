@@ -11,4 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MapsView" />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <include layout="@layout/wc_information_bottom_sheet" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>
