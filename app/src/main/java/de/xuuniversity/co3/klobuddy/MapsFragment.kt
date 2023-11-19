@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -147,7 +148,24 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
         }
         mMap.setOnMarkerClickListener {
-            wcInformationBottomSheet.visibility = View.VISIBLE
+            if(it.tag == null) return@setOnMarkerClickListener(false)
+
+            val wc = it.tag as ReducedWcEntity
+            val wcName = view?.findViewById<TextView>(R.id.wc_name)
+            if (wcName != null) {
+                wcName.text = wc.description
+            }
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
+                override fun onFinish() {
+                    wcInformationBottomSheet.visibility = View.VISIBLE
+                }
+
+                override fun onCancel() {
+                    wcInformationBottomSheet.visibility = View.GONE
+                }
+            })
+
             true
         }
 
@@ -218,11 +236,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 
             for (wc in filteredReducedWcEntities){
-                mMap.addMarker(MarkerOptions()
+                val marker = mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
                 )
+                marker?.tag = wc
             }
 
             placedMarker += filteredReducedWcEntities
