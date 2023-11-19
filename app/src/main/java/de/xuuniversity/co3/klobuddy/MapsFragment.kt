@@ -151,9 +151,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             if(it.tag == null) return@setOnMarkerClickListener(false)
 
             val wc = it.tag as ReducedWcEntity
-            val wcName = view?.findViewById<TextView>(R.id.wc_name)
-            if (wcName != null) {
-                wcName.text = wc.description
+
+            val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
+            if (wcDescription != null) {
+                wcDescription.text = wc.description
             }
 
             mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {

@@ -17,16 +17,11 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/wc_name"
+            android:id="@+id/wc_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="WC NAME" />
-
-        <TextView
-            android:id="@+id/wc_address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="WC ADDRESS" />
+            android:text="@string/bottom_sheet_description"
+            android:textSize="24sp" />
 
     </LinearLayout>
 
