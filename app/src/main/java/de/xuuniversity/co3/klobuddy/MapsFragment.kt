@@ -5,9 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -23,6 +26,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.ReducedWcEntity
@@ -45,6 +49,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var placedMarker : List<ReducedWcEntity> = listOf()
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
+    private lateinit var wcInformationBottomSheet: LinearLayout
 
     override fun onCreateView (
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,6 +64,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         getLastLocation()
+
+        wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
+
+
     }
 
 
@@ -103,6 +112,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isTiltGesturesEnabled = false
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         mMap.setMaxZoomPreference(17f)
         mMap.setMinZoomPreference(12f)
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
@@ -128,9 +138,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
 
             placeMarker(mMap.cameraPosition.target, radius)
-        }
 
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+            //Close bottom sheet if open
+            if (wcInformationBottomSheet.visibility == View.VISIBLE) {
+                wcInformationBottomSheet.visibility = View.GONE
+            }
+
+
+        }
+        mMap.setOnMarkerClickListener {
+            wcInformationBottomSheet.visibility = View.VISIBLE
+            true
+        }
 
         val location: LatLng = if (currentLocation != null) {
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
