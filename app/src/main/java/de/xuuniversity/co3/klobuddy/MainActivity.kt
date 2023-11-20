@@ -1,9 +1,23 @@
 package de.xuuniversity.co3.klobuddy
 
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.datastore.core.DataStore
 import androidx.fragment.app.Fragment
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
+import java.util.prefs.Preferences
+
+private const val USER_PREFERENCES_NAME = "user_preferences"
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = USER_PREFERENCES_NAME
+)
+
+
+private object PreferencesKeys {
+    val darkmode = booleanPreferencesKey("darkmode")
+}
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
