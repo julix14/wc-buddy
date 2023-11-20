@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
@@ -64,8 +65,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         getLastLocation()
 
         wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
-
-
+        wcInformationBottomSheet.visibility = View.GONE
     }
 
 
@@ -140,9 +140,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             //Close bottom sheet if open
             if (wcInformationBottomSheet.visibility == View.VISIBLE) {
                 wcInformationBottomSheet.visibility = View.GONE
+                BottomSheetBehavior.from(wcInformationBottomSheet).state = BottomSheetBehavior.STATE_COLLAPSED
             }
-
-
         }
         mMap.setOnMarkerClickListener {
             if(it.tag == null) return@setOnMarkerClickListener(false)
