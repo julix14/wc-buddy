@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -27,10 +25,9 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
-import de.xuuniversity.co3.klobuddy.wc.ReducedWcEntity
+import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 import kotlin.math.*
@@ -47,7 +44,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
-    private var placedMarker : List<ReducedWcEntity> = listOf()
+    private var placedMarker : List<WcEntity> = listOf()
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: LinearLayout
@@ -150,7 +147,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setOnMarkerClickListener {
             if(it.tag == null) return@setOnMarkerClickListener(false)
 
-            val wc = it.tag as ReducedWcEntity
+            val wc = it.tag as WcEntity
 
             val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
             if (wcDescription != null) {
@@ -204,8 +201,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng, radius: Double): List<ReducedWcEntity> {
-        val resultLocations = mutableListOf<ReducedWcEntity>()
+    private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
+        val resultLocations = mutableListOf<WcEntity>()
 
         val baseLatRad = Math.toRadians(cameraPosition.latitude)
         val baseLonRad = Math.toRadians(cameraPosition.longitude)
@@ -232,7 +229,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
         lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
+            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
             val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
             val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 

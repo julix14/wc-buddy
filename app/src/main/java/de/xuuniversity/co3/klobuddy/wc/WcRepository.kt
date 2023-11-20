@@ -11,11 +11,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 object WcRepository {
-    suspend fun getAllReducedWcEntities(activity: Activity): List<ReducedWcEntity> {
+    suspend fun getAllWcEntities(activity: Activity): List<WcEntity> {
         val db = RoomDatabaseSingleton.getDatabase(activity as Context)
         val wcDao = db.wcDao()
 
-        return wcDao.getAllReduced()
+        return wcDao.getAll()
     }
 
     suspend fun upsertReducedWcEntitiesFromFireStore(context: Context){
