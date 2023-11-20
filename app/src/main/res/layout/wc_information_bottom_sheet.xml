@@ -28,14 +28,45 @@
     </LinearLayout>
 
     <View
-        android:id="@+id/divider"
+        android:id="@+id/wc_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/wc_rating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/wc_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/wc_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/wc_postal_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/wc_changing_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/wc_urinal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder" />
+
 </LinearLayout>

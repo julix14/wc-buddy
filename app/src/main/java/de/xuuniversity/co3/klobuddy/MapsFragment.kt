@@ -151,10 +151,43 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             val wc = it.tag as WcEntity
 
+            //Write data to bottom sheet
             val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
             if (wcDescription != null) {
                 wcDescription.text = wc.description
             }
+
+            val wcRating = view?.findViewById<TextView>(R.id.wc_rating)
+            if (wcRating != null) {
+                val rounded = String.format("%.1f", wc.rating).toDouble()
+                wcRating.text = rounded.toString()
+            }
+
+            val wcPrice = view?.findViewById<TextView>(R.id.wc_price)
+            if (wcPrice != null) {
+                wcPrice.text = wc.price.toString()
+            }
+
+            val wcAddress = view?.findViewById<TextView>(R.id.wc_address)
+            if (wcAddress != null) {
+                wcAddress.text = wc.street
+            }
+
+            val wcPostalCode = view?.findViewById<TextView>(R.id.wc_postal_code)
+            if (wcPostalCode != null) {
+                wcPostalCode.text = wc.postalCode.toString()
+            }
+
+            val wcChangingTable = view?.findViewById<TextView>(R.id.wc_changing_table)
+            if (wcChangingTable != null) {
+                wcChangingTable.text = wc.hasChangingTable.toString()
+            }
+
+            val wcUrinal = view?.findViewById<TextView>(R.id.wc_urinal)
+            if (wcUrinal != null) {
+                wcUrinal.text = wc.hasUrinal.toString()
+            }
+
 
             mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
                 override fun onFinish() {
