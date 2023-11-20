@@ -9,6 +9,8 @@ data class WcEntity(
     val description: String,
     val latitude: Double,
     val longitude: Double,
+    val rating: Double,
+    val ratingCount: Int,
     val city: String? = null,
     val street: String? = null,
     val postalCode: Int? = null,

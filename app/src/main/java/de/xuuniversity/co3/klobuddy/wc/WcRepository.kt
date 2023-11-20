@@ -35,7 +35,9 @@ object WcRepository {
                             document.id,
                             document.data["description"].toString(),
                             document.data["latitude"].toString().toDouble(),
-                            document.data["longitude"].toString().toDouble()
+                            document.data["longitude"].toString().toDouble(),
+                            0.0,
+                            0
                         )
                         val dao = dbInstance.wcDao()
                         dao.upsertWcEntity(wcEntity)

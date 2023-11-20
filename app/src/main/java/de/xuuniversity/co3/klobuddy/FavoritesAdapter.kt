@@ -25,8 +25,8 @@ class FavoritesAdapter(
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
         holder.nameView.text = item.description
-        val randomRating = (1..5).random()
-        holder.ratingView.text = randomRating.toString()
+        val rounded = String.format("%.1f", item.rating).toDouble()
+        holder.ratingView.text = rounded.toString()
     }
 
 }
