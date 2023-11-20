@@ -70,7 +70,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
 
     override fun onPause() {
-        StatesSingleton.cameraPosition = mMap.cameraPosition
+        if(::mMap.isInitialized){
+            StatesSingleton.cameraPosition = mMap.cameraPosition
+        }
+
         super.onPause()
     }
 
