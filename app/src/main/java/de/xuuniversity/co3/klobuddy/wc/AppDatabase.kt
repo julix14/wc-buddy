@@ -7,7 +7,6 @@ import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 @Database(
     version = 1,
     entities = [WcEntity::class, FavoriteEntity::class],
-    views = [ReducedWcEntity::class],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun wcDao(): WcDao

@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -23,9 +25,10 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
-import de.xuuniversity.co3.klobuddy.wc.ReducedWcEntity
+import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 import kotlin.math.*
@@ -42,9 +45,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
-    private var placedMarker : List<ReducedWcEntity> = listOf()
+    private var placedMarker : List<WcEntity> = listOf()
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
+    private lateinit var wcInformationBottomSheet: LinearLayout
 
     override fun onCreateView (
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,11 +63,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         getLastLocation()
+
+        wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
+        wcInformationBottomSheet.visibility = View.GONE
     }
 
 
     override fun onPause() {
-        StatesSingleton.cameraPosition = mMap.cameraPosition
+        if(::mMap.isInitialized){
+            StatesSingleton.cameraPosition = mMap.cameraPosition
+        }
+
         super.onPause()
     }
 
@@ -103,6 +113,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isTiltGesturesEnabled = false
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         mMap.setMaxZoomPreference(17f)
         mMap.setMinZoomPreference(12f)
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
@@ -128,9 +139,35 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
 
             placeMarker(mMap.cameraPosition.target, radius)
-        }
 
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+            //Close bottom sheet if open
+            if (wcInformationBottomSheet.visibility == View.VISIBLE) {
+                wcInformationBottomSheet.visibility = View.GONE
+                BottomSheetBehavior.from(wcInformationBottomSheet).state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
+        mMap.setOnMarkerClickListener {
+            if(it.tag == null) return@setOnMarkerClickListener(false)
+
+            val wc = it.tag as WcEntity
+
+            val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
+            if (wcDescription != null) {
+                wcDescription.text = wc.description
+            }
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
+                override fun onFinish() {
+                    wcInformationBottomSheet.visibility = View.VISIBLE
+                }
+
+                override fun onCancel() {
+                    wcInformationBottomSheet.visibility = View.GONE
+                }
+            })
+
+            true
+        }
 
         val location: LatLng = if (currentLocation != null) {
             LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
@@ -166,8 +203,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun filterLocations(locations: List<ReducedWcEntity>, cameraPosition: LatLng, radius: Double): List<ReducedWcEntity> {
-        val resultLocations = mutableListOf<ReducedWcEntity>()
+    private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
+        val resultLocations = mutableListOf<WcEntity>()
 
         val baseLatRad = Math.toRadians(cameraPosition.latitude)
         val baseLonRad = Math.toRadians(cameraPosition.longitude)
@@ -194,16 +231,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
         lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllReducedWcEntities(requireActivity())
+            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
             val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
             val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 
             for (wc in filteredReducedWcEntities){
-                mMap.addMarker(MarkerOptions()
+                val marker = mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
                 )
+                marker?.tag = wc
             }
 
             placedMarker += filteredReducedWcEntities
