@@ -188,10 +188,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 wcUrinal.text = wc.hasUrinal.toString()
             }
 
+            /*
             val wcIsFavorite = view?.findViewById<TextView>(R.id.wc_is_favorite)
             if (wcIsFavorite != null) {
                 wcIsFavorite.text = "Favorite: ${wc.isFavorite.toString()}"
             }
+
+             */
 
 
 

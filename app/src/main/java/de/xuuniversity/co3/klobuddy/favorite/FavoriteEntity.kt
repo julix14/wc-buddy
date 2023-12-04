@@ -15,7 +15,7 @@ import de.xuuniversity.co3.klobuddy.wc.WcEntity
     ]
 )
 data class FavoriteEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val userID: Int,
     val lavatoryID: String,
 )

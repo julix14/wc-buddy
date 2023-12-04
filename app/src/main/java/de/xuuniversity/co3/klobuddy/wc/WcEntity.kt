@@ -11,7 +11,6 @@ data class WcEntity(
     val longitude: Double,
     val rating: Double,
     val ratingCount: Int,
-    val isFavorite: Boolean,
     val city: String? = null,
     val street: String? = null,
     val postalCode: Int? = null,

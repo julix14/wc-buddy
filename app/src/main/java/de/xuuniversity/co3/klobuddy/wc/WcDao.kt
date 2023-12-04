@@ -3,6 +3,7 @@ package de.xuuniversity.co3.klobuddy.wc
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -14,6 +15,9 @@ interface WcDao {
 
     @Upsert
     suspend fun upsertWcEntity(wcEntity: WcEntity)
+
+    @Upsert
+    suspend fun upsertFavoriteEntity(favoriteEntity: FavoriteEntity)
 
     @Query("SELECT * FROM WcEntity")
     fun getAllFlow(): Flow<List<WcEntity>>

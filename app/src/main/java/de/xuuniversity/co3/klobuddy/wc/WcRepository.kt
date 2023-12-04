@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,7 @@ object WcRepository {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
         // TODO: Hardcoded userId
-        val userId: Long = 1
+        val userId: Int = 1
 
         db.collection("WcEntity")
             .get()
@@ -32,22 +33,30 @@ object WcRepository {
                 for (document in result) {
                     coroutineScope.launch {
 
-                        val favoriteList: ArrayList<*>? = document.data["isFavorite"] as ArrayList<*>?
-                        val isFavorite = favoriteList?.contains(userId) ?: false
+                        val favoriteList: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
+                        val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
 
                         val wcEntity = WcEntity(
-                            document.id,
+                            document.data["lavatoryID"].toString(),
                             document.data["description"].toString(),
                             document.data["latitude"].toString().toDouble(),
                             document.data["longitude"].toString().toDouble(),
                             0.0,
                             0,
-                            isFavorite
                         )
+
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
                         val dao = dbInstance.wcDao()
-
                         dao.upsertWcEntity(wcEntity)
+
+                        if(isFavorite){
+                            val favoriteEntity = FavoriteEntity(
+                                userID = userId,
+                                lavatoryID = document.data["lavatoryID"].toString()
+                            )
+
+                            dao.upsertFavoriteEntity(favoriteEntity)
+                        }
                     }
                 }
             }
