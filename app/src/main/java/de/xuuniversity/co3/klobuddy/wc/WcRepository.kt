@@ -18,10 +18,13 @@ object WcRepository {
         return wcDao.getAll()
     }
 
-    suspend fun upsertReducedWcEntitiesFromFireStore(context: Context){
+    suspend fun upsertWcEntitiesFromFireStore(context: Context){
         val db = Firebase.firestore
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        // TODO: Hardcoded userId
+        val userId: Long = 1
 
         db.collection("WcEntity")
             .get()
@@ -29,17 +32,21 @@ object WcRepository {
                 for (document in result) {
                     coroutineScope.launch {
 
-                        val dbInstance = RoomDatabaseSingleton.getDatabase(context)
-                        // ToDO: Add type checks
+                        val favoriteList: ArrayList<*>? = document.data["isFavorite"] as ArrayList<*>?
+                        val isFavorite = favoriteList?.contains(userId) ?: false
+
                         val wcEntity = WcEntity(
                             document.id,
                             document.data["description"].toString(),
                             document.data["latitude"].toString().toDouble(),
                             document.data["longitude"].toString().toDouble(),
                             0.0,
-                            0
+                            0,
+                            isFavorite
                         )
+                        val dbInstance = RoomDatabaseSingleton.getDatabase(context)
                         val dao = dbInstance.wcDao()
+
                         dao.upsertWcEntity(wcEntity)
                     }
                 }

@@ -13,7 +13,7 @@ class MyApp : Application() {
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         coroutineScope.launch {
-            WcRepository.upsertReducedWcEntitiesFromFireStore(this@MyApp)
+            WcRepository.upsertWcEntitiesFromFireStore(this@MyApp)
         }
 
     }
