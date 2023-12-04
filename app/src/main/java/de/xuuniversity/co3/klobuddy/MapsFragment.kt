@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -194,6 +195,29 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val wcIsFavorite = view?.findViewById<TextView>(R.id.wc_is_favorite)
             if (wcIsFavorite != null) {
                 wcIsFavorite.text = "Favorite: ${favorite.toString()}"
+            }
+
+            val wcToggleFavorite = view?.findViewById<TextView>(R.id.wc_toggle_favorite)
+            if(wcToggleFavorite != null){
+                wcToggleFavorite.setOnClickListener {
+                    lifecycleScope.launch {
+                        //TODO: Hardcoded userId
+                        val userId: Int = 1
+
+                        WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
+                        return@launch
+
+                        if(favorite){
+                            Log.d("DEBUG", "Delete favorite")
+                            //WcRepository.deleteFavorite(requireContext(), wc.lavatoryID, userId)
+                        } else {
+                            Log.d("DEBUG", "Add favorite")
+                            WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
+                        }
+
+                        // it.visibility = View.GONE
+                    }
+                }
             }
 
 

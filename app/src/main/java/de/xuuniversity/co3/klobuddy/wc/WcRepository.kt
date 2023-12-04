@@ -65,6 +65,45 @@ object WcRepository {
             }
     }
 
+    //Adds Wc local and online to favorites of user
+    suspend fun addWcToFavorites(context: Context, lavatoryID: String, userID: Int){
+        //Local
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        val favoriteEntity = FavoriteEntity(
+            userID = userID,
+            lavatoryID = lavatoryID
+        )
+
+        wcDao.upsertFavoriteEntity(favoriteEntity)
+        //Online
+        val firestore = Firebase.firestore
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        firestore.collection("WcEntity")
+            .whereEqualTo("lavatoryID", lavatoryID)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    coroutineScope.launch {
+                        val favoriteListFromDatabase: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
+                        val favoriteList = favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
+                        val isFavorite = favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
+
+                        if(!isFavorite){
+                            favoriteList.add(userID)
+                            document.reference.update("userFavorites", favoriteList)
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
+
+    }
+
     suspend fun checkIfFavorite(context: Context, lavatoryID: String, userID: Int): Boolean {
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
