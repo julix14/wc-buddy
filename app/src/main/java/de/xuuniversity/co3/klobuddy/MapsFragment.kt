@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -197,34 +198,36 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 wcIsFavorite.text = "Favorite: ${favorite.toString()}"
             }
 
-            view?.findViewById<TextView>(R.id.wc_toggle_favorite)?.setOnClickListener {
-                lifecycleScope.launch {
-                    //TODO: Hardcoded userId
-                    val userId: Int = 1
+            view?.findViewById<Button>(R.id.wc_toggle_favorite)?.text =
+                if (!favorite) "Add to favorites" else "Remove from favorites"
+
+            view?.findViewById<Button>(R.id.wc_toggle_favorite)?.let { button ->
+                button.setOnClickListener {
+                    lifecycleScope.launch {
+                        //TODO: Hardcoded userId
+                        val userId: Int = 1
 
 
-                    if (favorite) {
-                        Log.d("DEBUG", "Delete favorite")
-                        WcRepository.removeWcFromFavorites(requireContext(), wc.lavatoryID, userId)
-                    } else {
-                        Log.d("DEBUG", "Add favorite")
-                        WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
-                        //it.text = "Remove from favorites
+                        if (favorite) {
+                            Log.d("DEBUG", "Delete favorite")
+                            WcRepository.removeWcFromFavorites(
+                                requireContext(),
+                                wc.lavatoryID,
+                                userId
+                            )
+                        } else {
+                            Log.d("DEBUG", "Add favorite")
+                            WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
+                        }
+
+                        favorite = !favorite
+                        activity?.runOnUiThread {
+                            button.text =
+                                if (!favorite) "Add to favorites" else "Remove from favorites"
+                        }
                     }
-
-                    /*
-                    activity?.runOnUiThread {
-                        it.text = if (favorite) "Add to favorites" else "Remove from favorites"
-                    }
-
-                     */
-
-                    favorite = !favorite
-
-                    // it.visibility = View.GONE
                 }
             }
-
 
             mMap.animateCamera(
                 CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)),
