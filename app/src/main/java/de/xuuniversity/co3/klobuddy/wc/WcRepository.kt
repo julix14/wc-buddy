@@ -77,6 +77,7 @@ object WcRepository {
         )
 
         wcDao.upsertFavoriteEntity(favoriteEntity)
+
         //Online
         val firestore = Firebase.firestore
         val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -102,6 +103,43 @@ object WcRepository {
                 Log.w("DEBUG", "Error getting documents.", exception)
             }
 
+    }
+
+    //Removes Wc local and online from favorites of user
+    suspend fun removeWcFromFavorites(context: Context, lavatoryID: String, userID: Int){
+        //Local
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        wcDao.removeFavoriteEntity(lavatoryID, userID)
+
+        //Online
+        val firestore = Firebase.firestore
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        firestore.collection("WcEntity")
+            .whereEqualTo("lavatoryID", lavatoryID)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    coroutineScope.launch {
+                        val favoriteListFromDatabase: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
+                        val favoriteList = favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
+                        val isFavorite = favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
+
+                        Log.d("DEBUG", "isFavorite: $isFavorite")
+
+
+                        if(isFavorite){
+                            favoriteList.remove(userID.toLong())
+                            document.reference.update("userFavorites", favoriteList)
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
     }
 
     suspend fun checkIfFavorite(context: Context, lavatoryID: String, userID: Int): Boolean {

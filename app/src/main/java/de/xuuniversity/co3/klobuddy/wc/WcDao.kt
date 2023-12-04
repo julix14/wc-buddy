@@ -21,6 +21,10 @@ interface WcDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun upsertFavoriteEntity(favoriteEntity: FavoriteEntity)
 
+    //Remove Favorite Entity
+    @Query("DELETE FROM FavoriteEntity WHERE lavatoryID = :lavatoryID AND userID = :userID")
+    suspend fun removeFavoriteEntity(lavatoryID: String?, userID: Int?)
+
     @Query("SELECT * FROM WcEntity")
     fun getAllFlow(): Flow<List<WcEntity>>
 

@@ -148,11 +148,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
         mMap.setOnMarkerClickListener {
-            if(it.tag == null) return@setOnMarkerClickListener(false)
+            if (it.tag == null) return@setOnMarkerClickListener (false)
 
             val data = it.tag as Map<*, *>
             val wc = data["entity"] as WcEntity
-            val favorite = data["favorite"] as Boolean
+            var favorite = data["favorite"] as Boolean
 
             //Write data to bottom sheet
             val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
@@ -197,39 +197,47 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 wcIsFavorite.text = "Favorite: ${favorite.toString()}"
             }
 
-            val wcToggleFavorite = view?.findViewById<TextView>(R.id.wc_toggle_favorite)
-            if(wcToggleFavorite != null){
-                wcToggleFavorite.setOnClickListener {
-                    lifecycleScope.launch {
-                        //TODO: Hardcoded userId
-                        val userId: Int = 1
+            view?.findViewById<TextView>(R.id.wc_toggle_favorite)?.setOnClickListener {
+                lifecycleScope.launch {
+                    //TODO: Hardcoded userId
+                    val userId: Int = 1
 
+
+                    if (favorite) {
+                        Log.d("DEBUG", "Delete favorite")
+                        WcRepository.removeWcFromFavorites(requireContext(), wc.lavatoryID, userId)
+                    } else {
+                        Log.d("DEBUG", "Add favorite")
                         WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
-                        return@launch
-
-                        if(favorite){
-                            Log.d("DEBUG", "Delete favorite")
-                            //WcRepository.deleteFavorite(requireContext(), wc.lavatoryID, userId)
-                        } else {
-                            Log.d("DEBUG", "Add favorite")
-                            WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
-                        }
-
-                        // it.visibility = View.GONE
+                        //it.text = "Remove from favorites
                     }
+
+                    /*
+                    activity?.runOnUiThread {
+                        it.text = if (favorite) "Add to favorites" else "Remove from favorites"
+                    }
+
+                     */
+
+                    favorite = !favorite
+
+                    // it.visibility = View.GONE
                 }
             }
 
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
-                override fun onFinish() {
-                    wcInformationBottomSheet.visibility = View.VISIBLE
-                }
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)),
+                250,
+                object : GoogleMap.CancelableCallback {
+                    override fun onFinish() {
+                        wcInformationBottomSheet.visibility = View.VISIBLE
+                    }
 
-                override fun onCancel() {
-                    wcInformationBottomSheet.visibility = View.GONE
-                }
-            })
+                    override fun onCancel() {
+                        wcInformationBottomSheet.visibility = View.GONE
+                    }
+                })
 
             true
         }
