@@ -149,7 +149,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setOnMarkerClickListener {
             if(it.tag == null) return@setOnMarkerClickListener(false)
 
-            val wc = it.tag as WcEntity
+            val data = it.tag as Map<*, *>
+            val wc = data["entity"] as WcEntity
+            val favorite = data["favorite"] as Boolean
 
             //Write data to bottom sheet
             val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
@@ -188,16 +190,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 wcUrinal.text = wc.hasUrinal.toString()
             }
 
-            /*
+
             val wcIsFavorite = view?.findViewById<TextView>(R.id.wc_is_favorite)
             if (wcIsFavorite != null) {
-                wcIsFavorite.text = "Favorite: ${wc.isFavorite.toString()}"
+                wcIsFavorite.text = "Favorite: ${favorite.toString()}"
             }
-
-             */
-
-
-
 
 
             mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
@@ -274,18 +271,25 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
+        // TODO: Hardcoded userId
+        val userId: Int = 1
+
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
             val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
             val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 
             for (wc in filteredReducedWcEntities){
+
+                val isFavorite = WcRepository.checkIfFavorite(requireContext(), wc.lavatoryID, userId)
+
                 val marker = mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
                 )
-                marker?.tag = wc
+                marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
+
             }
 
             placedMarker += filteredReducedWcEntities

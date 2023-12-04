@@ -31,6 +31,9 @@ interface WcDao {
     """)
     suspend fun getAllFavoritesByUserID(userID: Int): List<WcEntity>
 
+    @Query("SELECT COUNT(*) > 0 FROM FavoriteEntity WHERE userID = :userID AND lavatoryID = :lavatoryID")
+    suspend fun checkIfFavorite(lavatoryID: String?, userID: Int?): Boolean
+
     @Query("""
         SELECT WcEntity.* FROM WcEntity
         JOIN FavoriteEntity ON WcEntity.lavatoryID = FavoriteEntity.lavatoryID

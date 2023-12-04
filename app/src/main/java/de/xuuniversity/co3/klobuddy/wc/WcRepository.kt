@@ -65,6 +65,13 @@ object WcRepository {
             }
     }
 
+    suspend fun checkIfFavorite(context: Context, lavatoryID: String, userID: Int): Boolean {
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        return wcDao.checkIfFavorite(lavatoryID, userID)
+    }
+
     suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
