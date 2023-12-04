@@ -155,49 +155,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val wc = data["entity"] as WcEntity
             var favorite = data["favorite"] as Boolean
 
-            //Write data to bottom sheet
-            val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
-            if (wcDescription != null) {
-                wcDescription.text = wc.description
-            }
 
-            val wcRating = view?.findViewById<TextView>(R.id.wc_rating)
-            if (wcRating != null) {
-                val rounded = String.format("%.1f", wc.rating).toDouble()
-                wcRating.text = rounded.toString()
-            }
-
-            val wcPrice = view?.findViewById<TextView>(R.id.wc_price)
-            if (wcPrice != null) {
-                wcPrice.text = wc.price.toString()
-            }
-
-            val wcAddress = view?.findViewById<TextView>(R.id.wc_address)
-            if (wcAddress != null) {
-                wcAddress.text = wc.street
-            }
-
-            val wcPostalCode = view?.findViewById<TextView>(R.id.wc_postal_code)
-            if (wcPostalCode != null) {
-                wcPostalCode.text = wc.postalCode.toString()
-            }
-
-            val wcChangingTable = view?.findViewById<TextView>(R.id.wc_changing_table)
-            if (wcChangingTable != null) {
-                wcChangingTable.text = wc.hasChangingTable.toString()
-            }
-
-            val wcUrinal = view?.findViewById<TextView>(R.id.wc_urinal)
-            if (wcUrinal != null) {
-                wcUrinal.text = wc.hasUrinal.toString()
-            }
-
-
-            val wcIsFavorite = view?.findViewById<TextView>(R.id.wc_is_favorite)
-            if (wcIsFavorite != null) {
-                wcIsFavorite.text = "Favorite: ${favorite.toString()}"
-            }
-
+            // Write data to bottom sheet
+            view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
+            val rounded = String.format("%.1f", wc.rating).toDouble()
+            view?.findViewById<TextView>(R.id.wc_rating)?.text = rounded.toString()
+            view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
+            view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
+            view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
+            view?.findViewById<TextView>(R.id.wc_changing_table)?.text = wc.hasChangingTable.toString()
+            view?.findViewById<TextView>(R.id.wc_urinal)?.text = wc.hasUrinal.toString()
             view?.findViewById<Button>(R.id.wc_toggle_favorite)?.text =
                 if (!favorite) "Add to favorites" else "Remove from favorites"
 
