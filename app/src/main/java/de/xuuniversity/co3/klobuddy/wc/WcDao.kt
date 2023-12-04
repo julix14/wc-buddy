@@ -1,6 +1,8 @@
 package de.xuuniversity.co3.klobuddy.wc
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
@@ -16,7 +18,7 @@ interface WcDao {
     @Upsert
     suspend fun upsertWcEntity(wcEntity: WcEntity)
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun upsertFavoriteEntity(favoriteEntity: FavoriteEntity)
 
     @Query("SELECT * FROM WcEntity")
