@@ -25,7 +25,7 @@ class FavoritesAdapter(
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
         holder.nameView.text = item.description
-        val rounded = String.format("%.1f", item.rating).toDouble()
+        val rounded = String.format("%.1f", item.averageRating).toDouble()
         holder.ratingView.text = rounded.toString()
     }
 

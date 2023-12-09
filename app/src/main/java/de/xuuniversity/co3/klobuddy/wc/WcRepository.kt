@@ -25,7 +25,7 @@ object WcRepository {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
         // TODO: Hardcoded userId
-        val userId: Int = 1
+        val userId = 1
 
         db.collection("WcEntity")
             .get()
@@ -36,13 +36,22 @@ object WcRepository {
                         val favoriteList: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
                         val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
 
+
+                        val userRatings = document.data?.get("userRatings") as? Map<Int, Int> ?: emptyMap()
+                        val userRating = userRatings[userId] ?: 0
+                        var averageRating = userRatings.values.average()
+                        if(averageRating.isNaN()){
+                            averageRating = 0.0
+                        }
+                        Log.d("DEBUG", "averageRating: $averageRating")
+
                         val wcEntity = WcEntity(
                             document.data["lavatoryID"].toString(),
                             document.data["description"].toString(),
                             document.data["latitude"].toString().toDouble(),
                             document.data["longitude"].toString().toDouble(),
-                            0.0,
-                            0,
+                            averageRating,
+                            userRating,
                         )
 
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
@@ -157,3 +166,4 @@ object WcRepository {
     }
 
 }
+

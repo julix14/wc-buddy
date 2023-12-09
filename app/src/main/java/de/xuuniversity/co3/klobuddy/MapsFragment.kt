@@ -251,7 +251,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             val data = it.tag as Map<*, *>
             val wc = data["entity"] as WcEntity
-            var favorite = data["favorite"] as Boolean
+            val favorite = data["favorite"] as Boolean
 
             setupBottomSheetContent(wc, favorite)
 
@@ -276,7 +276,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         var favorite = initialFavorite
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
-        val rounded = String.format("%.1f", wc.rating).toDouble()
+        val rounded = String.format("%.1f", wc.averageRating).toDouble()
         view?.findViewById<TextView>(R.id.wc_rating)?.text = rounded.toString()
         view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
         view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
