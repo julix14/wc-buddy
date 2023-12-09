@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -310,6 +311,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     }
                 }
             }
+        }
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
+            Toast.makeText(requireContext(), "Rating: $rating", Toast.LENGTH_SHORT).show()
+            // Handle the rating change here
         }
     }
 }
