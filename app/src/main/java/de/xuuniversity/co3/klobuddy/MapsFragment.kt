@@ -30,16 +30,10 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
-import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
-import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.*
 
@@ -289,8 +283,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         var favorite = initialFavorite
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
-        val rounded = String.format("%.1f", wc.averageRating).toDouble()
-        view?.findViewById<TextView>(R.id.wc_rating)?.text = rounded.toString()
+        view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f",wc.averageRating)
         view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
         view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
         view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
@@ -327,19 +320,48 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         var isProgrammaticChange = false
+        val oldUserRating = wc.userRating ?: 0
         view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
             if(!isProgrammaticChange){
                 lifecycleScope.launch {
                     WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+                    var ratingCount = wc.ratingCount
+                    var averageRating: Double = wc.averageRating
+                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                    if(oldUserRating != 0){
+                        averageRating = removeFromAverageRating(averageRating, ratingCount, oldUserRating)
+                        ratingCount--
+                        Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                    }
+                    averageRating = addToAverageRating(averageRating, ratingCount, rating.toInt())
+                    ratingCount++
+                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+
                     //Update Rating
-                    val updatedWc = wc.copy(userRating = rating.toInt())
+                    val updatedWc = wc.copy(userRating = rating.toInt(), averageRating = averageRating, ratingCount = ratingCount)
                     markersMap[wc.lavatoryID]?.tag = mapOf("entity" to updatedWc, "favorite" to favorite)
+
+                    //Save in local DB
+                    WcRepository.updateAverageRating(requireContext(), wc.lavatoryID, averageRating, ratingCount)
+
+                    //Display averageRating in UI
+                    view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f", averageRating)
                 }
             }
         }
 
         isProgrammaticChange = true
-        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = wc.userRating!!.toFloat()
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = oldUserRating!!.toFloat()
         isProgrammaticChange = false
+    }
+
+    private fun addToAverageRating(averageRating: Double, ratingCount: Int, newUserRating: Int): Double {
+        val newAverageRating = (ratingCount * averageRating + newUserRating) / (ratingCount + 1)
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+    }
+
+    private fun removeFromAverageRating(averageRating: Double, ratingCount: Int, oldUserRating: Int): Double {
+        val newAverageRating = (ratingCount * averageRating - oldUserRating) / (ratingCount - 1)
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
     }
 }

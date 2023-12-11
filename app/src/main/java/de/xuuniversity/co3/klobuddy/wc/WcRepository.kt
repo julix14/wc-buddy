@@ -185,6 +185,16 @@ object WcRepository {
         return wcDao.checkIfFavorite(lavatoryID, userID)
     }
 
+    suspend fun updateAverageRating (context: Context, lavatoryID: String, averageRating: Double, ratingCount: Int){
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        Log.d("DEBUG", "Average rating updates locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+
+        wcDao.updateAverageRating(lavatoryID, averageRating, ratingCount)
+        Log.d("DEBUG", "Average rating updated locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+    }
+
     suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()

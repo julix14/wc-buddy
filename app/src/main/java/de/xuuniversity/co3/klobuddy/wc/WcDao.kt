@@ -24,6 +24,9 @@ interface WcDao {
     @Query("UPDATE WcEntity SET userRating = :rating WHERE lavatoryID = :lavatoryID")
     suspend fun saveUserRating(lavatoryID: String, rating: Int)
 
+    @Query("UPDATE WcEntity SET averageRating = :averageRating, ratingCount = :ratingCount WHERE lavatoryID = :lavatoryID")
+    suspend fun updateAverageRating(lavatoryID: String, averageRating: Double, ratingCount: Int)
+
     //Remove Favorite Entity
     @Query("DELETE FROM FavoriteEntity WHERE lavatoryID = :lavatoryID AND userID = :userID")
     suspend fun removeFavoriteEntity(lavatoryID: String?, userID: Int?)
