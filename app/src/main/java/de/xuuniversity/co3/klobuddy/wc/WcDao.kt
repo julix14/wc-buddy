@@ -21,6 +21,9 @@ interface WcDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun upsertFavoriteEntity(favoriteEntity: FavoriteEntity)
 
+    @Query("UPDATE WcEntity SET userRating = :rating WHERE lavatoryID = :lavatoryID")
+    suspend fun saveUserRating(lavatoryID: String, rating: Int)
+
     //Remove Favorite Entity
     @Query("DELETE FROM FavoriteEntity WHERE lavatoryID = :lavatoryID AND userID = :userID")
     suspend fun removeFavoriteEntity(lavatoryID: String?, userID: Int?)

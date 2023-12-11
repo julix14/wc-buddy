@@ -38,12 +38,13 @@ object WcRepository {
 
 
                         val userRatings = document.data?.get("userRatings") as? Map<Int, Int> ?: emptyMap()
+                        Log.d("DEBUG", "userRatings: $userRatings")
                         val userRating = userRatings[userId] ?: 0
                         var averageRating = userRatings.values.average()
                         if(averageRating.isNaN()){
                             averageRating = 0.0
                         }
-                        Log.d("DEBUG", "averageRating: $averageRating")
+                        Log.d("DEBUG", "userRating: $userRating ${document.data["lavatoryID"].toString()}")
 
                         val wcEntity = WcEntity(
                             document.data["lavatoryID"].toString(),
@@ -68,6 +69,32 @@ object WcRepository {
                         }
                     }
                 }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
+    }
+
+    suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
+        // Todo: Hardcoded userId
+        val userId = 1
+
+        //Save locally
+        val localDb = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = localDb.wcDao()
+
+        wcDao.saveUserRating(lavatoryID, rating.toInt())
+        Log.d("DEBUG", "User rating saved locally")
+
+        //Save online
+        val firestore = Firebase.firestore
+
+        val updates = mapOf<String, Int>("userRatings.$userId" to rating.toInt())
+
+        firestore.collection("WcEntity").document(lavatoryID)
+            .update(updates)
+            .addOnSuccessListener {
+                Log.d("DEBUG", "User rating saved online")
             }
             .addOnFailureListener { exception ->
                 Log.w("DEBUG", "Error getting documents.", exception)

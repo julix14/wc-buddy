@@ -29,10 +29,16 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
+import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
+import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.*
 
@@ -312,9 +318,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+
+        Log.d("DEBUG", "User rating: ${wc.userRating}")
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = wc.userRating!!.toFloat() ?: 0f
         view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
-            Toast.makeText(requireContext(), "Rating: $rating", Toast.LENGTH_SHORT).show()
-            // Handle the rating change here
+            lifecycleScope.launch {
+                WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+            }
         }
     }
 }
