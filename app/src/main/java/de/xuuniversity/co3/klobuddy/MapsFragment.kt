@@ -159,8 +159,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
-        // TODO: Hardcoded userId
-        val userId = 1
+        val userId = StatesSingleton.userId
 
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
@@ -295,8 +294,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         view?.findViewById<Button>(R.id.wc_toggle_favorite)?.let { button ->
             button.setOnClickListener {
                 lifecycleScope.launch {
-                    //TODO: Hardcoded userId
-                    val userId = 1
+                    val userId = StatesSingleton.userId
 
                     if (favorite) {
                         Log.d("DEBUG", "Delete favorite")
@@ -351,7 +349,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         isProgrammaticChange = true
-        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = oldUserRating!!.toFloat()
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = oldUserRating.toFloat()
         isProgrammaticChange = false
     }
 

@@ -7,10 +7,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.reflect.typeOf
 
 object WcRepository {
     suspend fun getAllWcEntities(activity: Activity): List<WcEntity> {
@@ -25,8 +25,7 @@ object WcRepository {
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        // TODO: Hardcoded userId
-        val userId: Int = 1
+        val userId = StatesSingleton.userId
 
         db.collection("WcEntity")
             .get()
@@ -76,8 +75,7 @@ object WcRepository {
     }
 
     suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
-        // Todo: Hardcoded userId
-        val userId = 1
+        val userId = StatesSingleton.userId
 
         //Save locally
         val localDb = RoomDatabaseSingleton.getDatabase(context)
@@ -89,7 +87,7 @@ object WcRepository {
         //Save online
         val firestore = Firebase.firestore
 
-        val updates = mapOf<String, Int>("userRatings.$userId" to rating.toInt())
+        val updates = mapOf("userRatings.$userId" to rating.toInt())
 
         firestore.collection("WcEntity").document(lavatoryID)
             .update(updates)
