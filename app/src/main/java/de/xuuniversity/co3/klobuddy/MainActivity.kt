@@ -12,8 +12,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-        val themePref = sharedPref.getString("themePref", "System default")
-        val themeModeInt = when (themePref) {
+
+        val themeModeInt = when (sharedPref.getString("themePref", "System default")) {
             "Light" -> AppCompatDelegate.MODE_NIGHT_NO
             "Dark" -> AppCompatDelegate.MODE_NIGHT_YES
             "System default" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
 
 
         supportFragmentManager.beginTransaction()
