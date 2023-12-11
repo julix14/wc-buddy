@@ -320,11 +320,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         Log.d("DEBUG", "User rating: ${wc.userRating}")
-        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = wc.userRating!!.toFloat() ?: 0f
+        var isProgrammaticChange = false
         view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
-            lifecycleScope.launch {
-                WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+            if(!isProgrammaticChange){
+                lifecycleScope.launch {
+                    WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+                }
             }
         }
+
+        isProgrammaticChange = true
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = wc.userRating!!.toFloat()
+        isProgrammaticChange = false
     }
 }
