@@ -69,4 +69,10 @@
         android:layout_height="wrap_content"
         android:text="@string/placeholder" />
 
+    <Button
+        android:id="@+id/wc_toggle_favorite"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="@string/placeholder" />
+
 </LinearLayout>

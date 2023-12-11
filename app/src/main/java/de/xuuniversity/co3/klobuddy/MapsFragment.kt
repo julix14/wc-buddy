@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -64,7 +66,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         getLastLocation()
 
-        wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
+        wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout)
         wcInformationBottomSheet.visibility = View.GONE
     }
 
@@ -107,119 +109,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.uiSettings.isZoomControlsEnabled = true
-        mMap.uiSettings.isZoomGesturesEnabled = true
-        mMap.uiSettings.isScrollGesturesEnabled = true
-        mMap.uiSettings.isRotateGesturesEnabled = true
-        mMap.uiSettings.isCompassEnabled = true
-        mMap.uiSettings.isTiltGesturesEnabled = false
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        mMap.setMaxZoomPreference(17f)
-        mMap.setMinZoomPreference(12f)
-        mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
-        mMap.setOnCameraMoveListener {
-            val zoomLevel = mMap.cameraPosition.zoom
-            val radius: Double
-            when {
-                zoomLevel < 13 -> {
-                    radius = RADIUS * 11
-                }
-                zoomLevel < 14 -> {
-                    radius = RADIUS * 7
-                }
-                zoomLevel < 15 -> {
-                    radius = RADIUS * 4
-                }
-                zoomLevel < 16 -> {
-                    radius = RADIUS * 2
-                }
-                else -> {
-                    radius = RADIUS
-                }
-            }
-
-            placeMarker(mMap.cameraPosition.target, radius)
-
-            //Close bottom sheet if open
-            if (wcInformationBottomSheet.visibility == View.VISIBLE) {
-                wcInformationBottomSheet.visibility = View.GONE
-                BottomSheetBehavior.from(wcInformationBottomSheet).state = BottomSheetBehavior.STATE_COLLAPSED
-            }
-        }
-        mMap.setOnMarkerClickListener {
-            if(it.tag == null) return@setOnMarkerClickListener(false)
-
-            val wc = it.tag as WcEntity
-
-            //Write data to bottom sheet
-            val wcDescription = view?.findViewById<TextView>(R.id.wc_description)
-            if (wcDescription != null) {
-                wcDescription.text = wc.description
-            }
-
-            val wcRating = view?.findViewById<TextView>(R.id.wc_rating)
-            if (wcRating != null) {
-                val rounded = String.format("%.1f", wc.rating).toDouble()
-                wcRating.text = rounded.toString()
-            }
-
-            val wcPrice = view?.findViewById<TextView>(R.id.wc_price)
-            if (wcPrice != null) {
-                wcPrice.text = wc.price.toString()
-            }
-
-            val wcAddress = view?.findViewById<TextView>(R.id.wc_address)
-            if (wcAddress != null) {
-                wcAddress.text = wc.street
-            }
-
-            val wcPostalCode = view?.findViewById<TextView>(R.id.wc_postal_code)
-            if (wcPostalCode != null) {
-                wcPostalCode.text = wc.postalCode.toString()
-            }
-
-            val wcChangingTable = view?.findViewById<TextView>(R.id.wc_changing_table)
-            if (wcChangingTable != null) {
-                wcChangingTable.text = wc.hasChangingTable.toString()
-            }
-
-            val wcUrinal = view?.findViewById<TextView>(R.id.wc_urinal)
-            if (wcUrinal != null) {
-                wcUrinal.text = wc.hasUrinal.toString()
-            }
-
-
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)), 250, object : GoogleMap.CancelableCallback {
-                override fun onFinish() {
-                    wcInformationBottomSheet.visibility = View.VISIBLE
-                }
-
-                override fun onCancel() {
-                    wcInformationBottomSheet.visibility = View.GONE
-                }
-            })
-
-            true
-        }
-
-        val location: LatLng = if (currentLocation != null) {
-            LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
-        } else {
-            _defaultLocation
-        }
-
-        if(cameraPosition != null)
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition!!))
-        else {
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
-        }
-
-        mMap.addMarker(MarkerOptions()
-            .position(location)
-            .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(requireContext(), R.drawable.outline_my_location_24)))
-            .title("Current Location")
-        )
+        setupMapUI(mMap)
+        setupCamera(mMap)
+        setupBottomSheet(mMap)
 
         placeMarker(_defaultLocation, RADIUS)
     }
@@ -263,21 +155,161 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
+        // TODO: Hardcoded userId
+        val userId = 1
+
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
             val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
             val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
 
             for (wc in filteredReducedWcEntities){
+
+                val isFavorite = WcRepository.checkIfFavorite(requireContext(), wc.lavatoryID, userId)
+
                 val marker = mMap.addMarker(MarkerOptions()
                     .position(LatLng(wc.latitude, wc.longitude))
                     .title(wc.description)
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
                 )
-                marker?.tag = wc
+                marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
+
             }
 
             placedMarker += filteredReducedWcEntities
+        }
+    }
+
+    private fun setupMapUI(mMap: GoogleMap){
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isZoomGesturesEnabled = true
+        mMap.uiSettings.isScrollGesturesEnabled = true
+        mMap.uiSettings.isRotateGesturesEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
+        mMap.uiSettings.isTiltGesturesEnabled = false
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mMap.setMaxZoomPreference(17f)
+        mMap.setMinZoomPreference(12f)
+        mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
+    }
+
+    private fun setupCamera(mMap: GoogleMap){
+        mMap.setOnCameraMoveListener {
+            val zoomLevel = mMap.cameraPosition.zoom
+            val radius: Double
+            when {
+                zoomLevel < 13 -> {
+                    radius = RADIUS * 11
+                }
+                zoomLevel < 14 -> {
+                    radius = RADIUS * 7
+                }
+                zoomLevel < 15 -> {
+                    radius = RADIUS * 4
+                }
+                zoomLevel < 16 -> {
+                    radius = RADIUS * 2
+                }
+                else -> {
+                    radius = RADIUS
+                }
+            }
+
+            placeMarker(mMap.cameraPosition.target, radius)
+
+            //Close bottom sheet if open
+            if (wcInformationBottomSheet.visibility == View.VISIBLE) {
+                wcInformationBottomSheet.visibility = View.GONE
+                BottomSheetBehavior.from(wcInformationBottomSheet).state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
+
+        val location: LatLng = if (currentLocation != null) {
+            LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
+        } else {
+            _defaultLocation
+        }
+
+        if(cameraPosition != null)
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition!!))
+        else {
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+        }
+
+        mMap.addMarker(MarkerOptions()
+            .position(location)
+            .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(requireContext(), R.drawable.outline_my_location_24)))
+            .title("Current Location")
+        )
+    }
+
+    private fun setupBottomSheet(mMap: GoogleMap){
+        mMap.setOnMarkerClickListener {
+            if (it.tag == null) return@setOnMarkerClickListener (false)
+
+            val data = it.tag as Map<*, *>
+            val wc = data["entity"] as WcEntity
+            var favorite = data["favorite"] as Boolean
+
+            setupBottomSheetContent(wc, favorite)
+
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)),
+                250,
+                object : GoogleMap.CancelableCallback {
+                    override fun onFinish() {
+                        wcInformationBottomSheet.visibility = View.VISIBLE
+                    }
+
+                    override fun onCancel() {
+                        wcInformationBottomSheet.visibility = View.GONE
+                    }
+                })
+
+            true
+        }
+    }
+
+    private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean){
+        var favorite = initialFavorite
+        // Write data to bottom sheet
+        view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
+        val rounded = String.format("%.1f", wc.rating).toDouble()
+        view?.findViewById<TextView>(R.id.wc_rating)?.text = rounded.toString()
+        view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
+        view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
+        view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
+        view?.findViewById<TextView>(R.id.wc_changing_table)?.text = wc.hasChangingTable.toString()
+        view?.findViewById<TextView>(R.id.wc_urinal)?.text = wc.hasUrinal.toString()
+        view?.findViewById<Button>(R.id.wc_toggle_favorite)?.text =
+            if (!favorite) "Add to favorites" else "Remove from favorites"
+
+        view?.findViewById<Button>(R.id.wc_toggle_favorite)?.let { button ->
+            button.setOnClickListener {
+                lifecycleScope.launch {
+                    //TODO: Hardcoded userId
+                    val userId = 1
+
+                    if (favorite) {
+                        Log.d("DEBUG", "Delete favorite")
+                        WcRepository.removeWcFromFavorites(
+                            requireContext(),
+                            wc.lavatoryID,
+                            userId
+                        )
+                    } else {
+                        Log.d("DEBUG", "Add favorite")
+                        WcRepository.addWcToFavorites(requireContext(), wc.lavatoryID, userId)
+                    }
+
+                    favorite = !favorite
+                    activity?.runOnUiThread {
+                        button.text =
+                            if (!favorite) "Add to favorites" else "Remove from favorites"
+                    }
+                }
+            }
         }
     }
 }
