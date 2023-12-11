@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
+import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -20,24 +21,25 @@ class MainActivity : AppCompatActivity() {
 
             binding.bottomNavigationView.menu.findItem(R.id.action_menu_map).isEnabled = true
             binding.bottomNavigationView.menu.findItem(R.id.action_menu_favorites).isEnabled = true
-            binding.bottomNavigationView.menu.findItem(R.id.action_menu_profile).isEnabled = true
+            binding.bottomNavigationView.menu.findItem(R.id.action_menu_settings).isEnabled = true
 
             when (item.itemId) {
                 R.id.action_menu_map -> {
                     replaceFragment(MapsFragment())
-                    binding.bottomNavigationView.menu.findItem(R.id.action_menu_map).isEnabled = false
+                    binding.bottomNavigationView.menu.findItem(R.id.action_menu_map).isEnabled =
+                        false
                     true
                 }
 
                 R.id.action_menu_favorites -> {
                     replaceFragment(FavoritesFragment())
-                    binding.bottomNavigationView.menu.findItem(R.id.action_menu_favorites).isEnabled = false
+                    binding.bottomNavigationView.menu.findItem(R.id.action_menu_favorites).isEnabled =
+                        false
                     true
                 }
 
-                R.id.action_menu_profile -> {
-                    replaceFragment(ProfileFragment())
-                    binding.bottomNavigationView.menu.findItem(R.id.action_menu_profile).isEnabled = false
+                R.id.action_menu_settings -> {
+                    replaceFragment(SettingsFragment())
                     true
                 }
 
