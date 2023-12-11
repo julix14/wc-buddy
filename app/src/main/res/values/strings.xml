@@ -12,6 +12,9 @@
     <string name="star">Star</string>
     <string name="bottom_sheet_description">WC DESCRIPTION</string>
     <string name="placeholder">PLACEHOLDER</string>
+
+
+    <string name="preferences_general_category_title">General</string>
     <string-array name="preferences_themeOptions">
         <item>Light</item>
         <item>Dark</item>
@@ -22,5 +25,4 @@
         <item>Dark</item>
         <item>System default</item>
     </string-array>
-
 </resources>
