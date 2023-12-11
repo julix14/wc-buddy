@@ -7,6 +7,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,8 +25,7 @@ object WcRepository {
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        // TODO: Hardcoded userId
-        val userId: Int = 1
+        val userId = StatesSingleton.userId
 
         db.collection("WcEntity")
             .get()
@@ -36,13 +36,22 @@ object WcRepository {
                         val favoriteList: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
                         val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
 
+                        val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
+                        val userRating = userRatings[userId.toString()] ?: 0
+                        var averageRating = userRatings.values.average()
+                        val ratingCount = userRatings.values.count()
+                        if(averageRating.isNaN()){
+                            averageRating = 0.0
+                        }
+
                         val wcEntity = WcEntity(
-                            document.data["lavatoryID"].toString(),
-                            document.data["description"].toString(),
-                            document.data["latitude"].toString().toDouble(),
-                            document.data["longitude"].toString().toDouble(),
-                            0.0,
-                            0,
+                            lavatoryID = document.data["lavatoryID"].toString(),
+                            description = document.data["description"].toString(),
+                            latitude = document.data["latitude"].toString().toDouble(),
+                            longitude = document.data["longitude"].toString().toDouble(),
+                            averageRating = averageRating,
+                            ratingCount = ratingCount,
+                            userRating = userRating.toInt(),
                         )
 
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
@@ -59,6 +68,31 @@ object WcRepository {
                         }
                     }
                 }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
+    }
+
+    suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
+        val userId = StatesSingleton.userId
+
+        //Save locally
+        val localDb = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = localDb.wcDao()
+
+        wcDao.saveUserRating(lavatoryID, rating.toInt())
+        Log.d("DEBUG", "User rating saved locally")
+
+        //Save online
+        val firestore = Firebase.firestore
+
+        val updates = mapOf("userRatings.$userId" to rating.toInt())
+
+        firestore.collection("WcEntity").document(lavatoryID)
+            .update(updates)
+            .addOnSuccessListener {
+                Log.d("DEBUG", "User rating saved online")
             }
             .addOnFailureListener { exception ->
                 Log.w("DEBUG", "Error getting documents.", exception)
@@ -149,6 +183,16 @@ object WcRepository {
         return wcDao.checkIfFavorite(lavatoryID, userID)
     }
 
+    suspend fun updateAverageRating (context: Context, lavatoryID: String, averageRating: Double, ratingCount: Int){
+        val db = RoomDatabaseSingleton.getDatabase(context)
+        val wcDao = db.wcDao()
+
+        Log.d("DEBUG", "Average rating updates locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+
+        wcDao.updateAverageRating(lavatoryID, averageRating, ratingCount)
+        Log.d("DEBUG", "Average rating updated locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+    }
+
     suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
@@ -157,3 +201,4 @@ object WcRepository {
     }
 
 }
+

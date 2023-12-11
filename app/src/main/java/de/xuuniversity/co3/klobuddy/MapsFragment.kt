@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
@@ -48,6 +50,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
     private var placedMarker : List<WcEntity> = listOf()
+    private val markersMap = mutableMapOf<String, Marker>()
+
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: LinearLayout
@@ -155,8 +159,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun placeMarker(cameraPosition: LatLng, radius: Double){
-        // TODO: Hardcoded userId
-        val userId = 1
+        val userId = StatesSingleton.userId
 
         lifecycleScope.launch {
             val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
@@ -173,6 +176,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
                 )
                 marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
+
+                markersMap[wc.lavatoryID] = marker!!
 
             }
 
@@ -248,9 +253,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setOnMarkerClickListener {
             if (it.tag == null) return@setOnMarkerClickListener (false)
 
-            val data = it.tag as Map<*, *>
-            val wc = data["entity"] as WcEntity
-            var favorite = data["favorite"] as Boolean
+            val tag = it.tag as Map<*, *>
+            val tagWc = tag["entity"] as WcEntity
+            val markerTag = markersMap[tagWc.lavatoryID]?.tag as Map<*, *>? ?: return@setOnMarkerClickListener (false)
+            val wc = markerTag["entity"] as WcEntity
+            val favorite = markerTag["favorite"] as Boolean
 
             setupBottomSheetContent(wc, favorite)
 
@@ -275,8 +282,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         var favorite = initialFavorite
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
-        val rounded = String.format("%.1f", wc.rating).toDouble()
-        view?.findViewById<TextView>(R.id.wc_rating)?.text = rounded.toString()
+        view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f",wc.averageRating)
         view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
         view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
         view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
@@ -288,8 +294,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         view?.findViewById<Button>(R.id.wc_toggle_favorite)?.let { button ->
             button.setOnClickListener {
                 lifecycleScope.launch {
-                    //TODO: Hardcoded userId
-                    val userId = 1
+                    val userId = StatesSingleton.userId
 
                     if (favorite) {
                         Log.d("DEBUG", "Delete favorite")
@@ -311,5 +316,50 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+
+        var isProgrammaticChange = false
+        val oldUserRating = wc.userRating ?: 0
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
+            if(!isProgrammaticChange){
+                lifecycleScope.launch {
+                    WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+                    var ratingCount = wc.ratingCount
+                    var averageRating: Double = wc.averageRating
+                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                    if(oldUserRating != 0){
+                        averageRating = removeFromAverageRating(averageRating, ratingCount, oldUserRating)
+                        ratingCount--
+                        Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                    }
+                    averageRating = addToAverageRating(averageRating, ratingCount, rating.toInt())
+                    ratingCount++
+                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+
+                    //Update Rating
+                    val updatedWc = wc.copy(userRating = rating.toInt(), averageRating = averageRating, ratingCount = ratingCount)
+                    markersMap[wc.lavatoryID]?.tag = mapOf("entity" to updatedWc, "favorite" to favorite)
+
+                    //Save in local DB
+                    WcRepository.updateAverageRating(requireContext(), wc.lavatoryID, averageRating, ratingCount)
+
+                    //Display averageRating in UI
+                    view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f", averageRating)
+                }
+            }
+        }
+
+        isProgrammaticChange = true
+        view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = oldUserRating.toFloat()
+        isProgrammaticChange = false
+    }
+
+    private fun addToAverageRating(averageRating: Double, ratingCount: Int, newUserRating: Int): Double {
+        val newAverageRating = (ratingCount * averageRating + newUserRating) / (ratingCount + 1)
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+    }
+
+    private fun removeFromAverageRating(averageRating: Double, ratingCount: Int, oldUserRating: Int): Double {
+        val newAverageRating = (ratingCount * averageRating - oldUserRating) / (ratingCount - 1)
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
     }
 }
