@@ -37,21 +37,22 @@ object WcRepository {
                         val favoriteList: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
                         val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
 
-
                         val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
                         val userRating = userRatings[userId.toString()] ?: 0
                         var averageRating = userRatings.values.average()
+                        val ratingCount = userRatings.values.count()
                         if(averageRating.isNaN()){
                             averageRating = 0.0
                         }
 
                         val wcEntity = WcEntity(
-                            document.data["lavatoryID"].toString(),
-                            document.data["description"].toString(),
-                            document.data["latitude"].toString().toDouble(),
-                            document.data["longitude"].toString().toDouble(),
-                            averageRating,
-                            userRating.toInt(),
+                            lavatoryID = document.data["lavatoryID"].toString(),
+                            description = document.data["description"].toString(),
+                            latitude = document.data["latitude"].toString().toDouble(),
+                            longitude = document.data["longitude"].toString().toDouble(),
+                            averageRating = averageRating,
+                            ratingCount = ratingCount,
+                            userRating = userRating.toInt(),
                         )
 
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
