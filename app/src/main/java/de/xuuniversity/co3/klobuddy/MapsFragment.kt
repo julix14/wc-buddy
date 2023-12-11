@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.Firebase
@@ -55,6 +56,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
     private var placedMarker : List<WcEntity> = listOf()
+    private val markersMap = mutableMapOf<String, Marker>()
+
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: LinearLayout
@@ -181,6 +184,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 )
                 marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
 
+                markersMap[wc.lavatoryID] = marker!!
+
             }
 
             placedMarker += filteredReducedWcEntities
@@ -255,9 +260,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setOnMarkerClickListener {
             if (it.tag == null) return@setOnMarkerClickListener (false)
 
-            val data = it.tag as Map<*, *>
-            val wc = data["entity"] as WcEntity
-            val favorite = data["favorite"] as Boolean
+            val tag = it.tag as Map<*, *>
+            val tagWc = tag["entity"] as WcEntity
+            val markerTag = markersMap[tagWc.lavatoryID]?.tag as Map<*, *>? ?: return@setOnMarkerClickListener (false)
+            val wc = markerTag["entity"] as WcEntity
+            val favorite = markerTag["favorite"] as Boolean
 
             setupBottomSheetContent(wc, favorite)
 
@@ -319,12 +326,14 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        Log.d("DEBUG", "User rating: ${wc.userRating}")
         var isProgrammaticChange = false
         view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
             if(!isProgrammaticChange){
                 lifecycleScope.launch {
                     WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+                    //Update Rating
+                    val updatedWc = wc.copy(userRating = rating.toInt())
+                    markersMap[wc.lavatoryID]?.tag = mapOf("entity" to updatedWc, "favorite" to favorite)
                 }
             }
         }
