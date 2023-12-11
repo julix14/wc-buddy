@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -200,21 +201,31 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+            // TODO: Chris need to implement this in the map, bc i am to scrared to destroy it
+            val defaultZoomLevel =
+                sharedPreferences.getString("zoom_level_preference", "14")?.toFloat()
+            Log.d("DEBUG", "Zoom Level: $defaultZoomLevel")
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
                 zoomLevel < 13 -> {
                     radius = RADIUS * 11
                 }
+
                 zoomLevel < 14 -> {
                     radius = RADIUS * 7
                 }
+
                 zoomLevel < 15 -> {
                     radius = RADIUS * 4
                 }
+
                 zoomLevel < 16 -> {
                     radius = RADIUS * 2
                 }
+
                 else -> {
                     radius = RADIUS
                 }
