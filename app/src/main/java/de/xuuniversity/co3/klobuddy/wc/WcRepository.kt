@@ -10,6 +10,7 @@ import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.reflect.typeOf
 
 object WcRepository {
     suspend fun getAllWcEntities(activity: Activity): List<WcEntity> {
@@ -25,7 +26,7 @@ object WcRepository {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
         // TODO: Hardcoded userId
-        val userId = 1
+        val userId: Int = 1
 
         db.collection("WcEntity")
             .get()
@@ -37,14 +38,12 @@ object WcRepository {
                         val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
 
 
-                        val userRatings = document.data?.get("userRatings") as? Map<Int, Int> ?: emptyMap()
-                        Log.d("DEBUG", "userRatings: $userRatings")
-                        val userRating = userRatings[userId] ?: 0
+                        val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
+                        val userRating = userRatings[userId.toString()] ?: 0
                         var averageRating = userRatings.values.average()
                         if(averageRating.isNaN()){
                             averageRating = 0.0
                         }
-                        Log.d("DEBUG", "userRating: $userRating ${document.data["lavatoryID"].toString()}")
 
                         val wcEntity = WcEntity(
                             document.data["lavatoryID"].toString(),
@@ -52,7 +51,7 @@ object WcRepository {
                             document.data["latitude"].toString().toDouble(),
                             document.data["longitude"].toString().toDouble(),
                             averageRating,
-                            userRating,
+                            userRating.toInt(),
                         )
 
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
