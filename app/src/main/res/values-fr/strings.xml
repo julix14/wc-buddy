@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KloBuddy</string>
+    <string name="action_menu_favorites">Favoris</string>
+    <string name="action_menu_map">Carte</string>
+    <string name="action_menu_settings">Paramètres</string>
+    <string name="title_activity_maps">Activité Cartes</string>
+    <string name="error_location_permission_denied">Vous avez refusé la permission de localisation</string>
+    <string name="favorites_view_button_start_navigation">Démarrer la navigation</string>
+    <string name="rating">Évaluation</string>
+    <string name="name">Nom</string>
+    <string name="your_favorites">Vos favoris :</string>
+    <string name="star">Étoile</string>
+    <string name="bottom_sheet_description">DESCRIPTION WC</string>
+    <string name="placeholder">PLACEHOLDER</string>
+
+    <string name="preferences_general_category_title">Général</string>
+    <string name="preferences_theme_title">Thème</string>
+    <string name="preferences_theme_summary">Choisissez votre thème préféré</string>
+    <string-array name="preferences_themeOptions">
+        <item>Clair</item>
+        <item>Sombre</item>
+        <item>Défaut du système</item>
+    </string-array>
+    <string name="preferences_zoom_level_title">Niveau de zoom</string>
+    <string name="preferences_zoom_level_summary">Choisissez votre niveau de zoom par défaut</string>
+    <string-array name="preferences_zoom_level_entries">
+        <item>Proche</item>
+        <item>Normal</item>
+        <item>Éloigné</item>
+    </string-array>
+</resources>
