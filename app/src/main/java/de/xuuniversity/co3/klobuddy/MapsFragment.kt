@@ -316,8 +316,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         if (wc.hasUrinal != null) iconList.add("urinal")
         if (wc.isHandicappedAccessible != null) iconList.add("wheelchair")
         when (wc.averageRating) {
-            in 0.0..2.0 -> iconList.add("poorRating")
-            in 2.0..4.0 -> iconList.add("middleRating")
+            in 0.0..1.9 -> iconList.add("poorRating")
+            in 2.0..3.9 -> iconList.add("middleRating")
             in 4.0..5.0 -> iconList.add("goodRating")
         }
 
