@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KloBuddy</string>
+    <string name="action_menu_favorites">收藏夹</string>
+    <string name="action_menu_map">地图</string>
+    <string name="action_menu_settings">设置</string>
+    <string name="title_activity_maps">地图活动</string>
+    <string name="error_location_permission_denied">您已拒绝位置权限</string>
+    <string name="favorites_view_button_start_navigation">开始导航</string>
+    <string name="rating">评分</string>
+    <string name="name">名称</string>
+    <string name="your_favorites">您的收藏：</string>
+    <string name="star">星</string>
+    <string name="bottom_sheet_description">厕所描述</string>
+    <string name="placeholder">占位符</string>
+
+    <string name="preferences_general_category_title">通用</string>
+    <string name="preferences_theme_title">主题</string>
+    <string name="preferences_theme_summary">选择您喜欢的主题</string>
+    <string-array name="preferences_themeOptions">
+        <item>浅色</item>
+        <item>深色</item>
+        <item>系统默认</item>
+    </string-array>
+    <string name="preferences_zoom_level_title">缩放级别</string>
+    <string name="preferences_zoom_level_summary">选择您喜欢的默认缩放级别</string>
+    <string-array name="preferences_zoom_level_entries">
+        <item>近</item>
+        <item>中</item>
+        <item>远</item>
+    </string-array>
+</resources>
