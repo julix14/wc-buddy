@@ -34,7 +34,7 @@
         <item>Normal</item>
         <item>Fern</item>
     </string-array>
-    <string-array name="preferences_zoom_level_keys">
+    <string-array name="preferences_zoom_level_values">
         <item>13</item>
         <item>14</item>
         <item>16</item>
