@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KloBuddy</string>
+    <string name="action_menu_favorites">Favoriten</string>
+    <string name="action_menu_map">Karte</string>
+    <string name="action_menu_settings">Einstellungen</string>
+    <string name="title_activity_maps">KartenAktivität</string>
+    <string name="error_location_permission_denied">Sie haben die Standortberechtigung abgelehnt</string>
+    <string name="favorites_view_button_start_navigation">Navigation starten</string>
+    <string name="rating">Bewertung</string>
+    <string name="name">Name</string>
+    <string name="your_favorites">Ihre Favoriten:</string>
+    <string name="star">Stern</string>
+    <string name="bottom_sheet_description">WC BESCHREIBUNG</string>
+    <string name="placeholder">PLATZHALTER</string>
+
+    <string name="preferences_general_category_title">Allgemein</string>
+    <string name="preferences_theme_title">Thema</string>
+    <string name="preferences_theme_summary">Wählen Sie Ihr bevorzugtes Thema</string>
+    <string-array name="preferences_themeOptions">
+        <item>Hell</item>
+        <item>Dunkel</item>
+        <item>Systemstandard</item>
+    </string-array>
+    <string-array name="preferences_themeValues">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System default</item>
+    </string-array>
+    <string name="preferences_zoom_level_title">Zoomstufe</string>
+    <string name="preferences_zoom_level_summary">Wählen Sie Ihre bevorzugte Standardzoomstufe</string>
+    <string-array name="preferences_zoom_level_entries">
+        <item>Nah</item>
+        <item>Normal</item>
+        <item>Fern</item>
+    </string-array>
+    <string-array name="preferences_zoom_level_keys">
+        <item>13</item>
+        <item>14</item>
+        <item>16</item>
+    </string-array>
+</resources>
