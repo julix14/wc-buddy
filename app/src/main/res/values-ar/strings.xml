@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">كلوبودي</string>
+    <string name="action_menu_favorites">المفضلات</string>
+    <string name="action_menu_map">الخريطة</string>
+    <string name="action_menu_settings">الإعدادات</string>
+    <string name="title_activity_maps">نشاط الخرائط</string>
+    <string name="error_location_permission_denied">لقد رفضت إذن الموقع</string>
+    <string name="favorites_view_button_start_navigation">بدء التنقل</string>
+    <string name="rating">التقييم</string>
+    <string name="name">الاسم</string>
+    <string name="your_favorites">مفضلاتك:</string>
+    <string name="star">نجمة</string>
+    <string name="bottom_sheet_description">وصف الحمام</string>
+    <string name="placeholder">عنصر نائب</string>
+
+    <string name="preferences_general_category_title">عام</string>
+    <string name="preferences_theme_title">الموضوع</string>
+    <string name="preferences_theme_summary">اختر موضوعك المفضل</string>
+    <string-array name="preferences_themeOptions">
+        <item>فاتح</item>
+        <item>داكن</item>
+        <item>افتراضي النظام</item>
+    </string-array>
+    <string name="preferences_zoom_level_title">مستوى التكبير</string>
+    <string name="preferences_zoom_level_summary">اختر مستوى التكبير الافتراضي المفضل لديك</string>
+    <string-array name="preferences_zoom_level_entries">
+        <item>قريب</item>
+        <item>عادي</item>
+        <item>بعيد</item>
+    </string-array>
+</resources>
