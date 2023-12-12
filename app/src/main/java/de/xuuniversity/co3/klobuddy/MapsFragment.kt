@@ -297,10 +297,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean) {
-        var favorite = initialFavorite
 
-        val iconWrapper = view?.findViewById<LinearLayout>(R.id.bottom_sheet_icons)
-        iconWrapper?.removeAllViews()
         val icons = HashMap(
             mapOf(
                 "changing_table" to R.drawable.baseline_baby_changing_station_24,
@@ -328,22 +325,14 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             else -> iconList.add("fee")
         }
 
-        for (icon in iconList) {
-            val iconView = ImageView(requireContext())
-            iconView.setImageResource(icons[icon]!!)
-            // Check if dark mode is enabled
-            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-                // Apply the ColorStateList to the Drawable wrapper
-                DrawableCompat.setTintList(iconView.drawable, ColorStateList.valueOf(Color.WHITE))
-
-            } else {
-                // Remove the color filter to show the original color of the Drawable wrapper
-                DrawableCompat.setTintList(iconView.drawable, null)
-            }
-            iconWrapper?.addView(iconView)
-        }
+        handleThemeOnPeekIcons(iconList, icons)
+        setupContent(wc, iconList)
+        handleFavoriteButtonAndRating(wc, initialFavorite)
+        handleRatingBar(wc, initialFavorite)
+    }
 
 
+    private fun setupContent(wc: WcEntity, iconList: List<String>) {
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_bottom_sheet_description)?.text = wc.description
         if (wc.street != null && wc.postalCode != null && wc.city != null) {
@@ -372,16 +361,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         //Price
-        if ((wc.price == null) || (wc.price?.equals(0.0) ?: false) || (wc.price?.equals(0) ?: false)
-        ) {
+        if ((wc.price == null) || (wc.price.equals(0.0))) {
             view?.findViewById<TextView>(R.id.wc_bottom_sheet_price)?.text =
                 getString(R.string.no_fee)
         } else {
             val price = wc.price.toString() + "€"
             view?.findViewById<TextView>(R.id.wc_bottom_sheet_price)?.text = price
         }
+        handleThemeOnDrawableLeft()
 
+    }
 
+    private fun handleThemeOnDrawableLeft() {
         for (item in view?.findViewById<LinearLayout>(R.id.bottom_sheet_content)?.children!!) {
             if (item is TextView) {
                 if (item.compoundDrawables[0] == null) continue
@@ -398,10 +389,32 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+    }
 
+    private fun handleThemeOnPeekIcons(iconList: List<String>, icons: HashMap<String, Int>) {
+        val iconWrapper = view?.findViewById<LinearLayout>(R.id.bottom_sheet_icons)
+        iconWrapper?.removeAllViews()
 
+        for (icon in iconList) {
+            val iconView = ImageView(requireContext())
+            iconView.setImageResource(icons[icon] ?: continue)
+            // Check if dark mode is enabled
+            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                // Apply the ColorStateList to the Drawable wrapper
+                DrawableCompat.setTintList(iconView.drawable, ColorStateList.valueOf(Color.WHITE))
 
+            } else {
+                // Remove the color filter to show the original color of the Drawable wrapper
+                DrawableCompat.setTintList(iconView.drawable, null)
+            }
+            iconWrapper?.addView(iconView)
 
+        }
+
+    }
+
+    private fun handleFavoriteButtonAndRating(wc: WcEntity, initialFavorite: Boolean) {
+        var favorite = initialFavorite
         view?.findViewById<Button>(R.id.wc_toggle_favorite)?.text =
             if (!favorite) "Add to favorites" else "Remove from favorites"
 
@@ -431,61 +444,75 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
+
+    }
+
+    private fun handleRatingBar(wc: WcEntity, favorite: Boolean = false) {
         var isProgrammaticChange = false
         val oldUserRating = wc.userRating ?: 0
-        view?.findViewById<RatingBar>(R.id.ratingBar)?.setOnRatingBarChangeListener { _, rating, _ ->
-            if(!isProgrammaticChange){
-                lifecycleScope.launch {
-                    WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
-                    var ratingCount = wc.ratingCount
-                    var averageRating: Double = wc.averageRating
-                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
-                    if (oldUserRating != 0) {
-                        averageRating =
-                            removeFromAverageRating(averageRating, ratingCount, oldUserRating)
-                        ratingCount--
+        view?.findViewById<RatingBar>(R.id.ratingBar)
+            ?.setOnRatingBarChangeListener { _, rating, _ ->
+                if (!isProgrammaticChange) {
+                    lifecycleScope.launch {
+                        WcRepository.saveUserRating(requireContext(), wc.lavatoryID, rating)
+                        var ratingCount = wc.ratingCount
+                        var averageRating: Double = wc.averageRating
                         Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                        if (oldUserRating != 0) {
+                            averageRating =
+                                removeFromAverageRating(averageRating, ratingCount, oldUserRating)
+                            ratingCount--
+                            Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+                        }
+                        averageRating =
+                            addToAverageRating(averageRating, ratingCount, rating.toInt())
+                        ratingCount++
+                        Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
+
+                        //Update Rating
+                        val updatedWc = wc.copy(
+                            userRating = rating.toInt(),
+                            averageRating = averageRating,
+                            ratingCount = ratingCount
+                        )
+                        markersMap[wc.lavatoryID]?.tag =
+                            mapOf("entity" to updatedWc, "favorite" to favorite)
+
+                        //Save in local DB
+                        WcRepository.updateAverageRating(
+                            requireContext(),
+                            wc.lavatoryID,
+                            averageRating,
+                            ratingCount
+                        )
+
+                        //Display averageRating in UI
+                        view?.findViewById<TextView>(R.id.wc_bottom_sheet_average_rating)?.text =
+                            String.format("%.1f", averageRating)
                     }
-                    averageRating = addToAverageRating(averageRating, ratingCount, rating.toInt())
-                    ratingCount++
-                    Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
-
-                    //Update Rating
-                    val updatedWc = wc.copy(
-                        userRating = rating.toInt(),
-                        averageRating = averageRating,
-                        ratingCount = ratingCount
-                    )
-                    markersMap[wc.lavatoryID]?.tag =
-                        mapOf("entity" to updatedWc, "favorite" to favorite)
-
-                    //Save in local DB
-                    WcRepository.updateAverageRating(
-                        requireContext(),
-                        wc.lavatoryID,
-                        averageRating,
-                        ratingCount
-                    )
-
-                    //Display averageRating in UI
-                    view?.findViewById<TextView>(R.id.wc_bottom_sheet_average_rating)?.text =
-                        String.format("%.1f", averageRating)
                 }
             }
-        }
 
         isProgrammaticChange = true
         view?.findViewById<RatingBar>(R.id.ratingBar)?.rating = oldUserRating.toFloat()
         isProgrammaticChange = false
     }
 
-    private fun addToAverageRating(averageRating: Double, ratingCount: Int, newUserRating: Int): Double {
+    private fun addToAverageRating(
+        averageRating: Double,
+        ratingCount: Int,
+        newUserRating: Int
+    ): Double {
         val newAverageRating = (ratingCount * averageRating + newUserRating) / (ratingCount + 1)
-        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it }
     }
 
-    private fun removeFromAverageRating(averageRating: Double, ratingCount: Int, oldUserRating: Int): Double {
+    private fun removeFromAverageRating(
+        averageRating: Double,
+        ratingCount: Int,
+        oldUserRating: Int
+    ): Double {
         val newAverageRating = (ratingCount * averageRating - oldUserRating) / (ratingCount - 1)
-        return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+        return newAverageRating.let { if (it.isNaN()) 0.0 else it }
     }
 }
