@@ -3,6 +3,8 @@ package de.xuuniversity.co3.klobuddy
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -11,11 +13,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -55,7 +61,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
 
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
-    private lateinit var wcInformationBottomSheet: LinearLayout
+    private lateinit var wcInformationBottomSheet: CardView
 
     override fun onCreateView (
         inflater: LayoutInflater, container: ViewGroup?,
@@ -290,11 +296,50 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean){
+    private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean) {
         var favorite = initialFavorite
+
+        val iconWrapper = view?.findViewById<LinearLayout>(R.id.bottom_sheet_icons)
+        val icons = HashMap(
+            mapOf(
+                "changing_table" to R.drawable.baseline_baby_changing_station_24,
+                "urinal" to R.drawable.baseline_urinal_24,
+                "wheelchair" to R.drawable.baseline_accessible_24,
+                "poorRating" to R.drawable.icon_selection_menu_star,
+                "middleRating" to R.drawable.baseline_star_half_24,
+                "goodRating" to R.drawable.outline_star_24
+            )
+        )
+        // Select icons to display
+        val iconList = mutableListOf<String>()
+        if (wc.hasChangingTable != null) iconList.add("changing_table")
+        if (wc.hasUrinal != null) iconList.add("urinal")
+        if (wc.isHandicappedAccessible != null) iconList.add("wheelchair")
+        when (wc.averageRating) {
+            in 0.0..2.0 -> iconList.add("poorRating")
+            in 2.0..4.0 -> iconList.add("middleRating")
+            in 4.0..5.0 -> iconList.add("goodRating")
+        }
+
+        for (icon in iconList) {
+            val iconView = ImageView(requireContext())
+            iconView.setImageResource(icons[icon]!!)
+            // Check if dark mode is enabled
+            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                // Apply the ColorStateList to the Drawable wrapper
+                DrawableCompat.setTintList(iconView.drawable, ColorStateList.valueOf(Color.WHITE))
+
+            } else {
+                // Remove the color filter to show the original color of the Drawable wrapper
+                DrawableCompat.setTintList(iconView.drawable, null)
+            }
+            iconWrapper?.addView(iconView)
+        }
+
+
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
-        view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f",wc.averageRating)
+        view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f", wc.averageRating)
         view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
         view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
         view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
