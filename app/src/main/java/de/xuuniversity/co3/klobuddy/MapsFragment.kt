@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -209,7 +210,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
 
-            // TODO: Chris need to implement this in the map, bc i am to scrared to destroy it
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
@@ -300,6 +300,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         var favorite = initialFavorite
 
         val iconWrapper = view?.findViewById<LinearLayout>(R.id.bottom_sheet_icons)
+        iconWrapper?.removeAllViews()
         val icons = HashMap(
             mapOf(
                 "changing_table" to R.drawable.baseline_baby_changing_station_24,
@@ -307,7 +308,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 "wheelchair" to R.drawable.baseline_accessible_24,
                 "poorRating" to R.drawable.icon_selection_menu_star,
                 "middleRating" to R.drawable.baseline_star_half_24,
-                "goodRating" to R.drawable.outline_star_24
+                "goodRating" to R.drawable.outline_star_24,
+                "fee" to R.drawable.baseline_attach_money_24,
+                "no_fee" to R.drawable.baseline_money_off_24
             )
         )
         // Select icons to display
@@ -319,6 +322,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             in 0.0..1.9 -> iconList.add("poorRating")
             in 2.0..3.9 -> iconList.add("middleRating")
             in 4.0..5.0 -> iconList.add("goodRating")
+        }
+        when (wc.price) {
+            0.0, null -> iconList.add("no_fee")
+            else -> iconList.add("fee")
         }
 
         for (icon in iconList) {
@@ -338,13 +345,63 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
 
         // Write data to bottom sheet
-        view?.findViewById<TextView>(R.id.wc_description)?.text = wc.description
-        view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f", wc.averageRating)
-        view?.findViewById<TextView>(R.id.wc_price)?.text = wc.price.toString()
-        view?.findViewById<TextView>(R.id.wc_address)?.text = wc.street
-        view?.findViewById<TextView>(R.id.wc_postal_code)?.text = wc.postalCode.toString()
-        view?.findViewById<TextView>(R.id.wc_changing_table)?.text = wc.hasChangingTable.toString()
-        view?.findViewById<TextView>(R.id.wc_urinal)?.text = wc.hasUrinal.toString()
+        view?.findViewById<TextView>(R.id.wc_bottom_sheet_description)?.text = wc.description
+        if (wc.street != null && wc.postalCode != null && wc.city != null) {
+            val address = arrayOf(wc.street, wc.postalCode, wc.city).joinToString(" ")
+            val addressView = view?.findViewById<TextView>(R.id.wc_bottom_sheet_address)
+
+            addressView?.text = address
+            addressView?.visibility = View.VISIBLE
+        }
+
+        view?.findViewById<TextView>(R.id.wc_bottom_sheet_average_rating)?.text =
+            String.format("%.1f", wc.averageRating)
+
+        //Information Icon Text
+        for (icon in iconList) {
+            when (icon) {
+                "changing_table" -> view?.findViewById<TextView>(R.id.wc_bottom_sheet_changing_table)?.visibility =
+                    View.VISIBLE
+
+                "urinal" -> view?.findViewById<TextView>(R.id.wc_bottom_sheet_urinal)?.visibility =
+                    View.VISIBLE
+
+                "wheelchair" -> view?.findViewById<TextView>(R.id.wc_bottom_sheet_wheelchair_accessible)?.visibility =
+                    View.VISIBLE
+            }
+        }
+
+        //Price
+        if ((wc.price == null) || (wc.price?.equals(0.0) ?: false) || (wc.price?.equals(0) ?: false)
+        ) {
+            view?.findViewById<TextView>(R.id.wc_bottom_sheet_price)?.text =
+                getString(R.string.no_fee)
+        } else {
+            val price = wc.price.toString() + "€"
+            view?.findViewById<TextView>(R.id.wc_bottom_sheet_price)?.text = price
+        }
+
+
+        for (item in view?.findViewById<LinearLayout>(R.id.bottom_sheet_content)?.children!!) {
+            if (item is TextView) {
+                if (item.compoundDrawables[0] == null) continue
+                if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                    // Apply the ColorStateList to the Drawable wrapper
+                    DrawableCompat.setTintList(
+                        item.compoundDrawables[0],
+                        ColorStateList.valueOf(Color.WHITE)
+                    )
+
+                } else {
+                    // Remove the color filter to show the original color of the Drawable wrapper
+                    DrawableCompat.setTintList(item.compoundDrawables[0], null)
+                }
+            }
+        }
+
+
+
+
         view?.findViewById<Button>(R.id.wc_toggle_favorite)?.text =
             if (!favorite) "Add to favorites" else "Remove from favorites"
 
@@ -383,8 +440,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     var ratingCount = wc.ratingCount
                     var averageRating: Double = wc.averageRating
                     Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
-                    if(oldUserRating != 0){
-                        averageRating = removeFromAverageRating(averageRating, ratingCount, oldUserRating)
+                    if (oldUserRating != 0) {
+                        averageRating =
+                            removeFromAverageRating(averageRating, ratingCount, oldUserRating)
                         ratingCount--
                         Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
                     }
@@ -393,14 +451,25 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
 
                     //Update Rating
-                    val updatedWc = wc.copy(userRating = rating.toInt(), averageRating = averageRating, ratingCount = ratingCount)
-                    markersMap[wc.lavatoryID]?.tag = mapOf("entity" to updatedWc, "favorite" to favorite)
+                    val updatedWc = wc.copy(
+                        userRating = rating.toInt(),
+                        averageRating = averageRating,
+                        ratingCount = ratingCount
+                    )
+                    markersMap[wc.lavatoryID]?.tag =
+                        mapOf("entity" to updatedWc, "favorite" to favorite)
 
                     //Save in local DB
-                    WcRepository.updateAverageRating(requireContext(), wc.lavatoryID, averageRating, ratingCount)
+                    WcRepository.updateAverageRating(
+                        requireContext(),
+                        wc.lavatoryID,
+                        averageRating,
+                        ratingCount
+                    )
 
                     //Display averageRating in UI
-                    view?.findViewById<TextView>(R.id.wc_rating)?.text = String.format("%.1f", averageRating)
+                    view?.findViewById<TextView>(R.id.wc_bottom_sheet_average_rating)?.text =
+                        String.format("%.1f", averageRating)
                 }
             }
         }

@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    app:cardCornerRadius="10dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     app:behavior_hideable="false"
     app:behavior_peekHeight="80dp"
+    app:cardPreventCornerOverlap="false"
     tools:visibility="gone">
 
     <ScrollView
@@ -16,10 +16,13 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/bottom_sheet_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingTop="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
             <LinearLayout
                 android:id="@+id/bottom_sheet_header"
@@ -29,7 +32,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/wc_description"
+                    android:id="@+id/wc_bottom_sheet_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/bottom_sheet_description"
@@ -50,46 +53,55 @@
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
 
-            <TextView
-                android:id="@+id/wc_rating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
 
             <TextView
-                android:id="@+id/wc_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
+                android:id="@+id/wc_bottom_sheet_address"
+                app:drawableLeftCompat="@drawable/baseline_location_on_24"
+                android:visibility="gone" />
 
             <TextView
-                android:id="@+id/wc_address"
+                android:id="@+id/wc_bottom_sheet_average_rating"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
+                android:text="@string/placeholder"
+                app:drawableLeftCompat="@drawable/outline_star_24" />
 
             <TextView
-                android:id="@+id/wc_postal_code"
+                android:id="@+id/wc_bottom_sheet_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
+                android:text="@string/placeholder"
+                app:drawableLeftCompat="@drawable/baseline_attach_money_24" />
 
             <TextView
-                android:id="@+id/wc_changing_table"
+                android:id="@+id/wc_bottom_sheet_changing_table"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
+                android:text="@string/has_changing_table"
+                app:drawableLeftCompat="@drawable/baseline_baby_changing_station_24"
+                android:visibility="gone" />
 
             <TextView
-                android:id="@+id/wc_urinal"
+                android:id="@+id/wc_bottom_sheet_wheelchair_accessible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder" />
+                android:text="@string/wheelchair_accessible"
+                app:drawableLeftCompat="@drawable/baseline_accessible_24" />
+
+            <TextView
+                android:id="@+id/wc_bottom_sheet_urinal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/has_urinal"
+                app:drawableLeftCompat="@drawable/baseline_urinal_24" />
+
 
             <Button
                 android:id="@+id/wc_toggle_favorite"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="50dp"
                 android:text="@string/placeholder" />
 
             <RatingBar
@@ -100,7 +112,6 @@
                 android:numStars="5"
                 android:stepSize="1.0"
                 android:rating="0" />
-
         </LinearLayout>
 
     </ScrollView>
