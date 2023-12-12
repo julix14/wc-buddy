@@ -2,7 +2,7 @@
     <string name="app_name">KloBuddy</string>
     <string name="action_menu_favorites">Favorites</string>
     <string name="action_menu_map">Map</string>
-    <string name="action_menu_profile">Profile</string>
+    <string name="action_menu_settings">Settings</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="error_location_permission_denied">You denied the location permission</string>
     <string name="favorites_view_button_start_navigation">Start navigation</string>
@@ -12,4 +12,31 @@
     <string name="star">Star</string>
     <string name="bottom_sheet_description">WC DESCRIPTION</string>
     <string name="placeholder">PLACEHOLDER</string>
+
+
+    <string name="preferences_general_category_title">General</string>
+    <string name="preferences_theme_title">Theme</string>
+    <string name="preferences_theme_summary">Choose your preferred theme</string>
+    <string-array name="preferences_themeOptions">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System default</item>
+    </string-array>
+    <string-array name="preferences_themeValues">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System default</item>
+    </string-array>
+    <string name="preferences_zoom_level_title">Zoom level</string>
+    <string name="preferences_zoom_level_summary">Choose your preferred default zoom level</string>
+    <string-array name="preferences_zoom_level_entries">
+        <item>Near</item>
+        <item>Normal</item>
+        <item>Far</item>
+    </string-array>
+    <string-array name="preferences_zoom_level_keys">
+        <item>17</item>
+        <item>16</item>
+        <item>15</item>
+    </string-array>
 </resources>

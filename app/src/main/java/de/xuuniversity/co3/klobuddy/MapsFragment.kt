@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -195,26 +196,33 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         mMap.setMaxZoomPreference(17f)
         mMap.setMinZoomPreference(12f)
+
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
     }
 
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
+
+            // TODO: Chris need to implement this in the map, bc i am to scrared to destroy it
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
                 zoomLevel < 13 -> {
                     radius = RADIUS * 11
                 }
+
                 zoomLevel < 14 -> {
                     radius = RADIUS * 7
                 }
+
                 zoomLevel < 15 -> {
                     radius = RADIUS * 4
                 }
+
                 zoomLevel < 16 -> {
                     radius = RADIUS * 2
                 }
+
                 else -> {
                     radius = RADIUS
                 }
@@ -238,7 +246,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         if(cameraPosition != null)
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition!!))
         else {
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val defaultZoomLevel =
+                sharedPreferences.getString("zoom_level_preference", "14")?.toFloat()
+            Log.d("DEBUG", "Zoom Level: $defaultZoomLevel")
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(defaultZoomLevel!!))
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
         }
 
