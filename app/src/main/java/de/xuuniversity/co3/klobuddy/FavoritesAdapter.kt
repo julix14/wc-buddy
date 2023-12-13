@@ -49,8 +49,8 @@ class FavoritesAdapter(
 
             } else {
                 // Remove the color filter to show the original color of the Drawable wrapper
-                DrawableCompat.setTintList(drawableWrapper, null)
-                DrawableCompat.setTintList(imageButtonWrapper, null)
+                DrawableCompat.setTintList(drawableWrapper, ColorStateList.valueOf(Color.BLACK))
+                DrawableCompat.setTintList(imageButtonWrapper, ColorStateList.valueOf(Color.BLACK))
             }
 
             // Set the Drawable wrapper as the drawableLeftCompat of the TextView
