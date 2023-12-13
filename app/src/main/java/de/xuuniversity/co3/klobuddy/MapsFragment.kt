@@ -385,7 +385,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
                 } else {
                     // Remove the color filter to show the original color of the Drawable wrapper
-                    DrawableCompat.setTintList(item.compoundDrawables[0], null)
+                    DrawableCompat.setTintList(
+                        item.compoundDrawables[0],
+                        ColorStateList.valueOf(Color.BLACK)
+                    )
                 }
             }
         }
@@ -405,7 +408,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             } else {
                 // Remove the color filter to show the original color of the Drawable wrapper
-                DrawableCompat.setTintList(iconView.drawable, null)
+                DrawableCompat.setTintList(iconView.drawable, ColorStateList.valueOf(Color.BLACK))
             }
             iconWrapper?.addView(iconView)
 

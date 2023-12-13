@@ -16,7 +16,7 @@ data class WcEntity(
     val street: String? = null,
     val postalCode: Int? = null,
     val country: String? = null,
-    val isHandicappedAccessible: Int? = 1,
+    val isHandicappedAccessible: Int? = null,
     val price: Double? = null,
     val canBePayedWithCoins: Int? = null,
     val canBePayedInApp: Int? = null,
