@@ -209,7 +209,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
-
+            //Hi, bestie! Love you, bye :)
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
@@ -321,7 +321,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             in 4.0..5.0 -> iconList.add("goodRating")
         }
         when (wc.price) {
-            0.0, null -> iconList.add("no_fee")
+            0.0 -> iconList.add("no_fee")
             else -> iconList.add("fee")
         }
 
