@@ -10,6 +10,10 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
+import android.util.Log
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 
 
 class FavoritesAdapter(
@@ -28,12 +32,17 @@ class FavoritesAdapter(
 
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
-
         // ...
 
         // Get the drawableLeftCompat of the TextView
         val drawableLeft = holder.ratingView.compoundDrawables[0]
         val imageNavigationButton = holder.ratingNavButton.drawable
+
+        holder.ratingNavButton.setOnClickListener{
+            Log.d("FavoritesAdapter", "Navigation button clicked ${item}")
+            //Set the destination
+            StatesSingleton.cameraPosition = CameraPosition(LatLng(item.latitude, item.longitude), 12f, 0f, 0f)
+        }
 
         if (drawableLeft != null) {
             // Create a Drawable wrapper
