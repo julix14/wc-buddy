@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, fragment)
+            .addToBackStack(null)
             .commit()
     }
 
