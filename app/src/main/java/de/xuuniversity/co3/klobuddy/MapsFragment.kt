@@ -1,6 +1,7 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -15,11 +16,15 @@ import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -37,6 +42,8 @@ import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 import kotlin.math.*
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
 
 const val FINE_PERMISSION_CODE = 1
 const val RADIUS = 1.0
@@ -69,7 +76,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        getLastLocation()
+        checkLocationPermissionAndRetrieveLocation()
 
         wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout)
         wcInformationBottomSheet.visibility = View.GONE
@@ -84,33 +91,66 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         super.onPause()
     }
 
-    private fun getLastLocation() {
-        val task = if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                FINE_PERMISSION_CODE
-            )
-            return
+    private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            getLastLocation()
         } else {
-            fusedLocationProviderClient!!.lastLocation
+            showLocationPermissionExplanation()
         }
-        task.addOnSuccessListener { location ->
-            if (location != null) {
-                currentLocation = location
-                val mapFragment = childFragmentManager
-                    .findFragmentById(R.id.activity_map) as SupportMapFragment
-                mapFragment.getMapAsync(this)
+    }
+
+    private fun checkLocationPermissionAndRetrieveLocation() {
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
+                getLastLocation()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Show an explanation to the user and try again
+                showLocationPermissionExplanation()
+            }
+            else -> {
+                // Directly request the permission
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
     }
+
+    private fun showLocationPermissionExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Location Permission Required")
+            .setMessage("This app requires location permission to function properly. Please grant the permission.")
+            .setPositiveButton("OK") { _, _ ->
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .create()
+            .show()
+    }
+
+
+    private fun getLastLocation() {
+        val locationRequest = LocationRequest.Builder(10000L)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .setMaxUpdates(1)
+            .build()
+
+        val locationCallback = object : com.google.android.gms.location.LocationCallback() {
+            override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                if (!isAdded || activity == null || context == null) {
+                    // Fragment is no longer attached, exit the callback
+                    return
+                }
+
+                currentLocation = locationResult.lastLocation
+                val mapFragment = childFragmentManager.findFragmentById(R.id.activity_map) as SupportMapFragment
+                mapFragment.getMapAsync(this@MapsFragment)
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
+    }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -119,18 +159,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         setupBottomSheet(mMap)
 
         placeMarker(_defaultLocation, RADIUS)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == FINE_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLastLocation()
-            } else {
-                Toast.makeText(requireContext(), R.string.error_location_permission_denied, Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
