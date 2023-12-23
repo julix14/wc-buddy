@@ -15,9 +15,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -42,8 +40,6 @@ import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 import kotlin.math.*
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.*
 const val RADIUS = 1.0
 
 // Coordinates of Berlin
@@ -57,8 +53,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentMapsBinding
     private var placedMarker : List<WcEntity> = listOf()
     private val markersMap = mutableMapOf<String, Marker>()
-
-
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: LinearLayout
 
@@ -112,7 +106,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-
     private fun getLastLocation() {
         val locationRequest = LocationRequest.Builder(10000L)
             .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
@@ -135,7 +128,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, null)
         }
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
