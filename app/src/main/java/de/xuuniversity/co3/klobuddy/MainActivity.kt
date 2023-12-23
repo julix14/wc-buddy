@@ -8,7 +8,7 @@ import androidx.preference.PreferenceManager
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallback {
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
@@ -69,5 +69,9 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, fragment)
             .commit()
+    }
+
+    override fun onNavigateToMap() {
+        replaceFragment(MapsFragment())
     }
 }

@@ -18,8 +18,12 @@ import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 
 class FavoritesAdapter(
     private val items: List<WcEntity>,
-    private val context: Context
+    private val context: Context,
+    private val callback: FavoritesAdapterCallback
 ): RecyclerView.Adapter<FavoritesViewHolder>() {
+    interface FavoritesAdapterCallback {
+        fun onNavigateToMap()
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoritesViewHolder {
         val view : View = LayoutInflater.from(context).inflate(R.layout.favorite_item, parent, false)
 
@@ -41,7 +45,10 @@ class FavoritesAdapter(
         holder.ratingNavButton.setOnClickListener{
             Log.d("FavoritesAdapter", "Navigation button clicked ${item}")
             //Set the destination
-            StatesSingleton.cameraPosition = CameraPosition(LatLng(item.latitude, item.longitude), 12f, 0f, 0f)
+            StatesSingleton.cameraPosition = CameraPosition(LatLng(item.latitude, item.longitude), 17f, 0f, 0f)
+
+            //Navigate to map
+            callback.onNavigateToMap()
         }
 
         if (drawableLeft != null) {

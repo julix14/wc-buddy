@@ -69,7 +69,7 @@ class FavoritesFragment : Fragment() {
 
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_favorites)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
+        recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext(), activity as FavoritesAdapter.FavoritesAdapterCallback)
 
         //Watch for changes in the database and updates the recyclerview
         lifecycleScope.launch {
@@ -81,7 +81,7 @@ class FavoritesFragment : Fragment() {
 
             flow.collect {
                 StatesSingleton.favoriteWCEntities = it
-                recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext())
+                recyclerView.adapter = FavoritesAdapter(StatesSingleton.favoriteWCEntities, requireContext(), activity as FavoritesAdapter.FavoritesAdapterCallback)
             }
         }
     }
