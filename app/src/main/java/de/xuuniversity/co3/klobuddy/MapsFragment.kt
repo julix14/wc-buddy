@@ -44,12 +44,10 @@ import kotlinx.coroutines.launch
 import kotlin.math.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
-
-const val FINE_PERMISSION_CODE = 1
 const val RADIUS = 1.0
 
 // Coordinates of Berlin
-private val _defaultLocation = LatLng(52.519733068718935, 13.404793124702566)
+private val _defaultLocation = LatLng(52.51430023974372, 13.410996312009937)
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -109,21 +107,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 showLocationPermissionExplanation()
             }
             else -> {
-                // Directly request the permission
                 locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
-    }
-
-    private fun showLocationPermissionExplanation() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Location Permission Required")
-            .setMessage("This app requires location permission to function properly. Please grant the permission.")
-            .setPositiveButton("OK") { _, _ ->
-                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            .create()
-            .show()
     }
 
 
@@ -230,8 +216,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
-
-            // TODO: Chris need to implement this in the map, bc i am to scrared to destroy it
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
@@ -280,6 +264,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             Log.d("DEBUG", "Zoom Level: $defaultZoomLevel")
             mMap.moveCamera(CameraUpdateFactory.zoomTo(defaultZoomLevel!!))
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+
+            // Location is out of bounds
+            if (location.latitude < 52.3 || location.latitude > 52.7 || location.longitude < 13.0 || location.longitude > 13.8) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(_defaultLocation))
+                showOutOfBoundsExplanation()
+            }
         }
 
         mMap.addMarker(MarkerOptions()
@@ -401,5 +391,27 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private fun removeFromAverageRating(averageRating: Double, ratingCount: Int, oldUserRating: Int): Double {
         val newAverageRating = (ratingCount * averageRating - oldUserRating) / (ratingCount - 1)
         return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+    }
+
+    private fun showLocationPermissionExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Location Permission Required")
+            .setMessage("This app requires location permission to function properly. Please grant the permission.")
+            .setPositiveButton("OK") { _, _ ->
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .create()
+            .show()
+    }
+
+    private fun showOutOfBoundsExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Location is out of bounds")
+            .setMessage("You are currently out of the supported area. To use all features, please move to Berlin.")
+            .setPositiveButton("OK") { _, _ ->
+              return@setPositiveButton
+            }
+            .create()
+            .show()
     }
 }
