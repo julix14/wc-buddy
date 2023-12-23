@@ -115,14 +115,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun getLastLocation() {
         val locationRequest = LocationRequest.Builder(10000L)
-            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
             .setMaxUpdates(1)
             .build()
 
         val locationCallback = object : com.google.android.gms.location.LocationCallback() {
             override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
                 if (!isAdded || activity == null || context == null) {
-                    // Fragment is no longer attached, exit the callback
                     return
                 }
 
