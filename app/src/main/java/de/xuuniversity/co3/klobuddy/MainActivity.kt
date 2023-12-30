@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 
 class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallback {
     private lateinit var binding: ActivityMainBinding
@@ -31,8 +32,9 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
         if (currentUser == null) {
             // User not logged in, redirect to LoginActivity
             val intent = Intent(this, LoginActivity::class.java)
+            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.toInt() ?: 1
             startActivity(intent)
-            finish() // Close MainActivity
+            finish()
         }
         setContentView(binding.root)
 
