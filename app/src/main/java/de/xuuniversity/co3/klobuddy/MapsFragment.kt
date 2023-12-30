@@ -1,6 +1,7 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -14,12 +15,14 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -36,13 +39,16 @@ import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
-const val FINE_PERMISSION_CODE = 1
 const val RADIUS = 1.0
 
 // Coordinates of Berlin
-private val _defaultLocation = LatLng(52.519733068718935, 13.404793124702566)
+private val _defaultLocation = LatLng(52.51430023974372, 13.410996312009937)
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -52,8 +58,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentMapsBinding
     private var placedMarker : List<WcEntity> = listOf()
     private val markersMap = mutableMapOf<String, Marker>()
-
-
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: LinearLayout
 
@@ -69,7 +73,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        getLastLocation()
+        checkLocationPermissionAndRetrieveLocation()
 
         wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout)
         wcInformationBottomSheet.visibility = View.GONE
@@ -84,31 +88,49 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         super.onPause()
     }
 
-    private fun getLastLocation() {
-        val task = if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                FINE_PERMISSION_CODE
-            )
-            return
+    private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            getLastLocation()
         } else {
-            fusedLocationProviderClient!!.lastLocation
+            showLocationPermissionExplanation()
         }
-        task.addOnSuccessListener { location ->
-            if (location != null) {
-                currentLocation = location
-                val mapFragment = childFragmentManager
-                    .findFragmentById(R.id.activity_map) as SupportMapFragment
-                mapFragment.getMapAsync(this)
+    }
+
+    private fun checkLocationPermissionAndRetrieveLocation() {
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
+                getLastLocation()
             }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Show an explanation to the user and try again
+                showLocationPermissionExplanation()
+            }
+            else -> {
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+
+    private fun getLastLocation() {
+        val locationRequest = LocationRequest.Builder(10000L)
+            .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .setMaxUpdates(1)
+            .build()
+
+        val locationCallback = object : com.google.android.gms.location.LocationCallback() {
+            override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                if (!isAdded || activity == null || context == null) {
+                    return
+                }
+
+                currentLocation = locationResult.lastLocation
+                val mapFragment = childFragmentManager.findFragmentById(R.id.activity_map) as SupportMapFragment
+                mapFragment.getMapAsync(this@MapsFragment)
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, null)
         }
     }
 
@@ -119,18 +141,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         setupBottomSheet(mMap)
 
         placeMarker(_defaultLocation, RADIUS)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == FINE_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLastLocation()
-            } else {
-                Toast.makeText(requireContext(), R.string.error_location_permission_denied, Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
@@ -202,8 +212,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupCamera(mMap: GoogleMap){
         mMap.setOnCameraMoveListener {
-
-            // TODO: Chris need to implement this in the map, bc i am to scrared to destroy it
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
             when {
@@ -252,6 +260,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             Log.d("DEBUG", "Zoom Level: $defaultZoomLevel")
             mMap.moveCamera(CameraUpdateFactory.zoomTo(defaultZoomLevel!!))
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+
+            // Location is out of bounds
+            if (location.latitude < 52.3 || location.latitude > 52.7 || location.longitude < 13.0 || location.longitude > 13.8) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(_defaultLocation))
+                showOutOfBoundsExplanation()
+            }
         }
 
         mMap.addMarker(MarkerOptions()
@@ -373,5 +387,27 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private fun removeFromAverageRating(averageRating: Double, ratingCount: Int, oldUserRating: Int): Double {
         val newAverageRating = (ratingCount * averageRating - oldUserRating) / (ratingCount - 1)
         return newAverageRating.let { if (it.isNaN()) 0.0 else it}
+    }
+
+    private fun showLocationPermissionExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.location_permission_title)
+            .setMessage(R.string.location_permission_message)
+            .setPositiveButton("OK") { _, _ ->
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .create()
+            .show()
+    }
+
+    private fun showOutOfBoundsExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.out_of_bounds_title)
+            .setMessage(R.string.out_of_bounds_message)
+            .setPositiveButton("OK") { _, _ ->
+              return@setPositiveButton
+            }
+            .create()
+            .show()
     }
 }
