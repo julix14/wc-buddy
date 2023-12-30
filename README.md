@@ -1,6 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/_Od3b_Hk)
 
-# Keep in mind then you run the code
+# Keep in mind when you run the code
 - Set the location of your emulator to a location in Berlin. Otherwise, the app will not work properly.
 - The app is optimized for the Pixel 6 with API 34. The app should also work on other devices, but the layout might be a bit off.
 - The app is optimized for the English language. The app should also work in German. Change the language in the settings of your emulator.
