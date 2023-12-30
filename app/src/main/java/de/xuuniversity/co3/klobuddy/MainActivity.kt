@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
     }
 
     override fun onNavigateToMap() {
+        binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
         replaceFragment(MapsFragment())
     }
 }
