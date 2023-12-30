@@ -36,8 +36,6 @@ class FavoritesAdapter(
 
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
-        // ...
-
         // Get the drawableLeftCompat of the TextView
         val drawableLeft = holder.ratingView.compoundDrawables[0]
         val imageNavigationButton = holder.ratingNavButton.drawable
