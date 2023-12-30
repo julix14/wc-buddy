@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "884287377088-aok0795v2dr180bdghpch0ahfahbpngh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.xuuniversity.co3.klobuddy",
+            "certificate_hash": "b0353661fca45b121906ed12b0a29d8684c3402c"
+          }
+        },
+        {
           "client_id": "884287377088-smhe024l7ltso9uoqlcvvph54p5fghd1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
