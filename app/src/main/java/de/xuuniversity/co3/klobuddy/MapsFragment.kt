@@ -39,7 +39,12 @@ import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
+
 const val RADIUS = 1.0
 
 // Coordinates of Berlin
@@ -386,8 +391,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun showLocationPermissionExplanation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Location Permission Required")
-            .setMessage("This app requires location permission to function properly. Please grant the permission.")
+            .setTitle(R.string.location_permission_title)
+            .setMessage(R.string.location_permission_message)
             .setPositiveButton("OK") { _, _ ->
                 locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
@@ -397,8 +402,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun showOutOfBoundsExplanation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Location is out of bounds")
-            .setMessage("You are currently out of the supported area. To use all features, please move to Berlin.")
+            .setTitle(R.string.out_of_bounds_title)
+            .setMessage(R.string.out_of_bounds_message)
             .setPositiveButton("OK") { _, _ ->
               return@setPositiveButton
             }
