@@ -12,15 +12,33 @@
           "package_name": "de.xuuniversity.co3.klobuddy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "884287377088-smhe024l7ltso9uoqlcvvph54p5fghd1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.xuuniversity.co3.klobuddy",
+            "certificate_hash": "bdf11c1fdea060ae713ea60c134bcff49e70484a"
+          }
+        },
+        {
+          "client_id": "884287377088-eu8rkleckloao9533qnosphhor8fbsrv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAazacjsyAIQ-PUN4OmAzzQv5r1BzYr48g"
+          "current_key": "AIzaSyA87KrFaOf3f1QQ8bWAIhau9Q5-gVoquzA"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884287377088-eu8rkleckloao9533qnosphhor8fbsrv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

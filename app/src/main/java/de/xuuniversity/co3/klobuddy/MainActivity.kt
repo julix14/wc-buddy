@@ -1,10 +1,14 @@
 package de.xuuniversity.co3.klobuddy
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
 
@@ -23,6 +27,13 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
 
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            // User not logged in, redirect to LoginActivity
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish() // Close MainActivity
+        }
         setContentView(binding.root)
 
         binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
