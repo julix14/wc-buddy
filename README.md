@@ -7,7 +7,7 @@
 
 # Documentation
 ## Idea of the App
-The app helps you to find a toilette in Berlin. You can save a toilette as a favorite and you can also 
+The app helps you to find a toilet in Berlin. You can save a toilet as a favorite and you can also 
 rate a toilette. For each toilette you can see more details in a bottom sheet. You can also see the location 
 of the toilette on a map.
 
