@@ -326,7 +326,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 else -> iconList.add("fee")
             }
         }
-        Log.d("DEBUG", "Icon List: $iconList, $wc")
         handleThemeOnPeekIcons(iconList, icons)
         setupContent(wc, iconList)
         handleFavoriteButtonAndRating(wc, initialFavorite)
