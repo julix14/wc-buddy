@@ -8,8 +8,8 @@
 # Documentation
 ## Idea of the App
 The app helps you to find a toilet in Berlin. You can save a toilet as a favorite and you can also 
-rate a toilette. For each toilette you can see more details in a bottom sheet. You can also see the location 
-of the toilette on a map.
+rate a toilet. For each toilet you can see more details in a bottom sheet. You can also see the location 
+of the toilet on a map.
 
 ## Development Process
 The majority of our project was completed over a single weekend, beginning with the development of the map. 
