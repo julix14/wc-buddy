@@ -320,11 +320,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             in 2.0..3.9 -> iconList.add("middleRating")
             in 4.0..5.0 -> iconList.add("goodRating")
         }
-        when (wc.price) {
-            0.0 -> iconList.add("no_fee")
-            else -> iconList.add("fee")
+        if (wc.price != null) {
+            when (wc.price) {
+                0.0 -> iconList.add("no_fee")
+                else -> iconList.add("fee")
+            }
         }
-
+        Log.d("DEBUG", "Icon List: $iconList, $wc")
         handleThemeOnPeekIcons(iconList, icons)
         setupContent(wc, iconList)
         handleFavoriteButtonAndRating(wc, initialFavorite)

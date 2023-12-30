@@ -73,7 +73,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/placeholder"
-                app:drawableLeftCompat="@drawable/baseline_attach_money_24" />
+                app:drawableLeftCompat="@drawable/baseline_attach_money_24"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/wc_bottom_sheet_changing_table"
@@ -88,14 +89,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/wheelchair_accessible"
-                app:drawableLeftCompat="@drawable/baseline_accessible_24" />
+                app:drawableLeftCompat="@drawable/baseline_accessible_24"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/wc_bottom_sheet_urinal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/has_urinal"
-                app:drawableLeftCompat="@drawable/baseline_urinal_24" />
+                app:drawableLeftCompat="@drawable/baseline_urinal_24"
+                android:visibility="gone" />
 
 
             <Button
