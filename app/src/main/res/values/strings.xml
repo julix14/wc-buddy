@@ -46,6 +46,8 @@
     <string name="theme_change_dialog_message">Please restart the app for the changes to take effect.</string>
     <string name="dialog_option_restart">Restart</string>
     <string name="dialog_option_later">Later</string>
+    <string name="sign_in_with_google">Click here to sign in or register</string>
+    <string name="sign_in_to_continue">Please sign in to use the full capabilites of KloBuddy.</string>
     <string-array name="preferences_zoom_level_entries">
         <item>Near</item>
         <item>Normal</item>

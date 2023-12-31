@@ -43,6 +43,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 .setMessage(R.string.sign_out_dialog_message)
                 .setPositiveButton(R.string.dialog_option_yes) { _, _ ->
                     FirebaseAuth.getInstance().signOut()
+                    activity?.finish()
                 }
                 .setNegativeButton(R.string.dialog_option_no) { dialog, _ ->
                     dialog.dismiss()
