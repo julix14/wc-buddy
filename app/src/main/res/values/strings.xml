@@ -13,7 +13,13 @@
     <string name="bottom_sheet_description">WC DESCRIPTION</string>
     <string name="placeholder">PLACEHOLDER</string>
 
+    <!-- Bottom sheet -->
+    <string name="has_changing_table">Changing table available</string>
+    <string name="wheelchair_accessible">Wheelchair accessible</string>
+    <string name="has_urinal">Urinal available</string>
+    <string name="no_fee">Free to use</string>
 
+    <!-- Preferences -->
     <string name="preferences_general_category_title">General</string>
     <string name="preferences_theme_title">Theme</string>
     <string name="preferences_theme_summary">Choose your preferred theme</string>
