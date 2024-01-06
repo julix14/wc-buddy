@@ -30,9 +30,11 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
         if (currentUser == null) {
             // User not logged in, redirect to LoginActivity
             val intent = Intent(this, LoginActivity::class.java)
-            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.toInt() ?: 1
+            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
             startActivity(intent)
             finish()
+        } else {
+            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
         }
         setContentView(binding.root)
 
