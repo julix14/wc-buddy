@@ -47,7 +47,7 @@
     <string name="dialog_option_restart">Restart</string>
     <string name="dialog_option_later">Later</string>
     <string name="sign_in_with_google">Click here to sign in or register</string>
-    <string name="sign_in_to_continue">Please sign in to use the full capabilites of KloBuddy.</string>
+    <string name="sign_in_to_continue">Please sign in with your Google-Account to use the full capabilities of KloBuddy.</string>
     <string-array name="preferences_zoom_level_entries">
         <item>Near</item>
         <item>Normal</item>
