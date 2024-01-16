@@ -1,6 +1,8 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, MapsFragment())
+            .addToBackStack(MapsFragment().javaClass.simpleName)
             .commit()
         binding.bottomNavigationView.menu.findItem(R.id.action_menu_map).isChecked = true
 
@@ -64,15 +67,57 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
                 else -> false
             }
         }
+        val callback = object : OnBackPressedCallback(true /* enabled by default */) {
+            override fun handleOnBackPressed() {
+                Log.d("MainActivity", "Back pressed")
+                if (supportFragmentManager.backStackEntryCount < 2) {
+                    finish()
+                    return
+                }
+                val fragmentToNavigate =
+                    supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name.toString()
+                supportFragmentManager.popBackStack()
+
+                when (fragmentToNavigate) {
+                    "MapsFragment" -> {
+                        binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
+                        replaceFragment(MapsFragment(), false)
+                    }
+
+                    "FavoritesFragment" -> {
+                        binding.bottomNavigationView.selectedItemId = R.id.action_menu_favorites
+                        replaceFragment(FavoritesFragment(), false)
+
+                    }
+
+                    "SettingsFragment" -> {
+                        binding.bottomNavigationView.selectedItemId = R.id.action_menu_settings
+                        replaceFragment(SettingsFragment(), false)
+
+                    }
+                }
+
+
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
     }
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.frameLayout, fragment)
-            .addToBackStack(null)
-            .commit()
+
+    private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean = true) {
+        if (addToBackStack) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.frameLayout, fragment)
+                .addToBackStack(fragment.javaClass.simpleName)
+                .commit()
+        } else {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.frameLayout, fragment)
+                .commit()
+        }
     }
 
     override fun onNavigateToMap() {
+        binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
         replaceFragment(MapsFragment())
     }
 }
