@@ -2,6 +2,7 @@ package de.xuuniversity.co3.klobuddy
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
@@ -37,6 +38,8 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
             StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
         }
         setContentView(binding.root)
+        Log.d("Login", "User ID: ${StatesSingleton.userId}")
+
 
         binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
 
