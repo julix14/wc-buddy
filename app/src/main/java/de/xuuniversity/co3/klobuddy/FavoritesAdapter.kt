@@ -36,6 +36,7 @@ class FavoritesAdapter(
 
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
+
         // Get the drawableLeftCompat of the TextView
         val drawableLeft = holder.ratingView.compoundDrawables[0]
         val imageNavigationButton = holder.ratingNavButton.drawable
@@ -65,8 +66,8 @@ class FavoritesAdapter(
 
             } else {
                 // Remove the color filter to show the original color of the Drawable wrapper
-                DrawableCompat.setTintList(drawableWrapper, null)
-                DrawableCompat.setTintList(imageButtonWrapper, null)
+                DrawableCompat.setTintList(drawableWrapper, ColorStateList.valueOf(Color.BLACK))
+                DrawableCompat.setTintList(imageButtonWrapper, ColorStateList.valueOf(Color.BLACK))
             }
 
             // Set the Drawable wrapper as the drawableLeftCompat of the TextView
