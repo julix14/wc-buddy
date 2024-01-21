@@ -27,7 +27,7 @@ object WcRepository {
 
         val userId = StatesSingleton.userId
 
-        db.collection("WcEntity")
+        db.collection("toilettes")
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
@@ -43,12 +43,13 @@ object WcRepository {
                         if(averageRating.isNaN()){
                             averageRating = 0.0
                         }
+                        Log.d("DEBUG", document.data.toString())
 
                         val wcEntity = WcEntity(
-                            lavatoryID = document.data["lavatoryID"].toString(),
-                            description = document.data["description"].toString(),
-                            latitude = document.data["latitude"].toString().toDouble(),
-                            longitude = document.data["longitude"].toString().toDouble(),
+                            lavatoryID = document.data["LavatoryID"].toString(),
+                            description = document.data["Description"].toString(),
+                            latitude = document.data["Latitude"].toString().replace(",", ".").toDouble(),
+                            longitude = document.data["Longitude"].toString().replace(",", ".").toDouble(),
                             averageRating = averageRating,
                             ratingCount = ratingCount,
                             userRating = userRating.toInt(),
@@ -61,7 +62,7 @@ object WcRepository {
                         if(isFavorite){
                             val favoriteEntity = FavoriteEntity(
                                 userID = userId,
-                                lavatoryID = document.data["lavatoryID"].toString()
+                                lavatoryID = document.data["LavatoryID"].toString()
                             )
 
                             dao.upsertFavoriteEntity(favoriteEntity)
@@ -89,7 +90,7 @@ object WcRepository {
 
         val updates = mapOf("userRatings.$userId" to rating.toInt())
 
-        firestore.collection("WcEntity").document(lavatoryID)
+        firestore.collection("toilettes").document(lavatoryID)
             .update(updates)
             .addOnSuccessListener {
                 Log.d("DEBUG", "User rating saved online")
@@ -116,8 +117,8 @@ object WcRepository {
         val firestore = Firebase.firestore
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        firestore.collection("WcEntity")
-            .whereEqualTo("lavatoryID", lavatoryID)
+        firestore.collection("toilettes")
+            .whereEqualTo("LavatoryID", lavatoryID)
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
@@ -151,8 +152,8 @@ object WcRepository {
         val firestore = Firebase.firestore
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        firestore.collection("WcEntity")
-            .whereEqualTo("lavatoryID", lavatoryID)
+        firestore.collection("toilettes")
+            .whereEqualTo("LavatoryID", lavatoryID)
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
