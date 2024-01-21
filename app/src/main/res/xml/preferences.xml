@@ -19,6 +19,13 @@
             app:defaultValue="14" />
 
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferences_user_preferences_category_title">
+        <Preference
+            app:key="sign_out_preference"
+            app:title="@string/preferences_sign_out_title"
+            app:summary="@string/preferences_sign_out_summary" />
+    </PreferenceCategory>
 
 
 </PreferenceScreen>

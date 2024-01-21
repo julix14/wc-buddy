@@ -1,5 +1,6 @@
 package de.xuuniversity.co3.klobuddy
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
@@ -7,8 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 
 class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallback {
     private lateinit var binding: ActivityMainBinding
@@ -25,7 +28,19 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
 
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            // User not logged in, redirect to LoginActivity
+            val intent = Intent(this, LoginActivity::class.java)
+            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
+            startActivity(intent)
+            finish()
+        } else {
+            StatesSingleton.userId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
+        }
         setContentView(binding.root)
+        Log.d("Login", "User ID: ${StatesSingleton.userId}")
+
 
         binding.bottomNavigationView.selectedItemId = R.id.action_menu_map
 

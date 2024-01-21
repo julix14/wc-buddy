@@ -77,7 +77,7 @@ class FavoritesFragment : Fragment() {
             val db = RoomDatabaseSingleton.getDatabase(activity as Context)
             val wcDao = db.wcDao()
 
-            val flow = wcDao.getAllFavoritesByUserIDFlowDistinct(1)
+            val flow = wcDao.getAllFavoritesByUserIDFlowDistinct(StatesSingleton.userId)
 
             flow.collect {
                 StatesSingleton.favoriteWCEntities = it
