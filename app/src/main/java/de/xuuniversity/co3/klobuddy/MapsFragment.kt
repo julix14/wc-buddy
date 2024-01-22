@@ -199,7 +199,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val onlyNewWcEntities =
                 allWcEntities.filterNot { it.lavatoryID in placedWcEntities }
             val filteredWcEntities =
-                filterLocations(onlyNewWcEntities, mMap.cameraPosition.target, radius)
+                filterLocations(onlyNewWcEntities, StatesSingleton.cameraPosition?.target ?: _defaultLocation, radius)
 
             for (wc in filteredWcEntities) {
 
@@ -311,6 +311,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupCamera(mMap: GoogleMap) {
+        mMap.setOnMapLoadedCallback {
+            addItems(RADIUS)
+        }
         mMap.setOnCameraMoveListener {
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
