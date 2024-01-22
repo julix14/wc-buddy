@@ -7,11 +7,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import de.xuuniversity.co3.klobuddy.wc.WcRepository
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallback {
     private lateinit var binding: ActivityMainBinding
@@ -40,6 +43,11 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
         }
         setContentView(binding.root)
         Log.d("Login", "User ID: ${StatesSingleton.userId}")
+
+        // Todo: Julius, is this placement right?
+        lifecycleScope.launch {
+            WcRepository.upsertUserFavoritesFromFireStore(this@MainActivity)
+        }
 
 
         binding.bottomNavigationView.selectedItemId = R.id.action_menu_map

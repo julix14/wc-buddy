@@ -74,6 +74,36 @@ object WcRepository {
             }
     }
 
+    suspend fun upsertUserFavoritesFromFireStore(context: Context){
+        val firestore = Firebase.firestore
+
+        val localDb = RoomDatabaseSingleton.getDatabase(context)
+
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        val userId = StatesSingleton.userId
+
+        firestore.collection("toilettes")
+            .whereArrayContains("userFavorites", userId)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    coroutineScope.launch {
+                        val favoriteEntity = FavoriteEntity(
+                            userID = userId,
+                            lavatoryID = document.data["LavatoryID"].toString()
+                        )
+
+                        val dao = localDb.wcDao()
+                        dao.upsertFavoriteEntity(favoriteEntity)
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
+    }
+
     suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
         val userId = StatesSingleton.userId
 
