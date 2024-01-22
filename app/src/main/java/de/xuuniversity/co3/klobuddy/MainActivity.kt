@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
         // Todo: Julius, is this placement right?
         lifecycleScope.launch {
             WcRepository.upsertUserFavoritesFromFireStore(this@MainActivity)
+            WcRepository.upsertUserRatingsFromFireStore(this@MainActivity)
         }
 
 

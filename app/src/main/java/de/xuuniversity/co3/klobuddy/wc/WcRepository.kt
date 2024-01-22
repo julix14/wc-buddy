@@ -104,6 +104,32 @@ object WcRepository {
             }
     }
 
+    suspend fun upsertUserRatingsFromFireStore(context: Context){
+        val firestore = Firebase.firestore
+
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        val userId = StatesSingleton.userId
+
+        firestore.collection("toilettes")
+            .orderBy("userRatings.$userId")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    coroutineScope.launch {
+                        //Update in Room
+                        val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
+                        val userRating = userRatings[userId.toString()] ?: 0
+
+                        saveUserRating(context, document.data["LavatoryID"].toString(), userRating.toFloat())
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("DEBUG", "Error getting documents.", exception)
+            }
+    }
+
     suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
         val userId = StatesSingleton.userId
 
