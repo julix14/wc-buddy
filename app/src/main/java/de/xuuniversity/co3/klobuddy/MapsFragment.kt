@@ -49,6 +49,7 @@ import de.xuuniversity.co3.klobuddy.wc.WcEntity
 import de.xuuniversity.co3.klobuddy.wc.WcEntityClusterItem
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -71,7 +72,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: CardView
     private lateinit var clusterManager: ClusterManager<WcEntityClusterItem>
-    private val placedWcEntities: Set<String> = setOf()
+    private var placedWcEntities: Set<String> = setOf()
+
+    private val lastMapCallTime = AtomicLong(0)
+    private val delayBetweenMapCalls = 500
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -168,7 +172,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         setupCamera(mMap)
 
         cluster(mMap)
-        //placeMarker(_defaultLocation, RADIUS)
     }
 
     @SuppressLint("PotentialBehaviorOverride")
@@ -182,17 +185,27 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             setupBottomSheet(mMap, item)
             true
         }
-
-        addItems()
     }
 
-    private fun addItems() {
+    private fun addItems(radius: Double) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastMapCallTime.get() < delayBetweenMapCalls) {
+            return
+        }
+        lastMapCallTime.set(currentTime)
+
         lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
+            val allWcEntities = WcRepository.getAllWcEntities(requireActivity())
+            val onlyNewWcEntities =
+                allWcEntities.filterNot { it.lavatoryID in placedWcEntities }
+            val filteredWcEntities =
+                filterLocations(onlyNewWcEntities, mMap.cameraPosition.target, radius)
 
-            for (wc in allReducedWcEntity) {
+            for (wc in filteredWcEntities) {
 
-                if (wc.lavatoryID in placedWcEntities) continue
+                if(wc.lavatoryID in placedWcEntities){
+                    continue
+                }
 
                 val isFavorite =
                     WcRepository.checkIfFavorite(
@@ -204,8 +217,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 val clusterItem = WcEntityClusterItem(wc, isFavorite)
                 clusterManager.addItem(clusterItem)
 
-                placedWcEntities.plus(wc.lavatoryID)
+                placedWcEntities = placedWcEntities.plus(wc.lavatoryID)
+                Log.d("DEBUG", "Placed WcEntities: ${clusterItem.getWcEntity().lavatoryID}")
+                //Todo: Move maybe outside of loop
             }
+            clusterManager.cluster()
+
         }
 
     }
@@ -319,7 +336,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
             }
 
-            //placeMarker(mMap.cameraPosition.target, radius)
+            addItems(radius)
 
             //Close bottom sheet if open
             if (wcInformationBottomSheet.visibility == View.VISIBLE) {
