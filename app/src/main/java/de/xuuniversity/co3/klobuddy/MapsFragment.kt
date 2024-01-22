@@ -185,6 +185,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             setupBottomSheet(mMap, item)
             true
         }
+
+        addItems(RADIUS)
     }
 
     private fun addItems(radius: Double) {
@@ -311,9 +313,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupCamera(mMap: GoogleMap) {
-        mMap.setOnMapLoadedCallback {
-            addItems(RADIUS)
-        }
         mMap.setOnCameraMoveListener {
             val zoomLevel = mMap.cameraPosition.zoom
             val radius: Double
