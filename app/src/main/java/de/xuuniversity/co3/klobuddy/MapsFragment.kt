@@ -71,6 +71,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: CardView
     private lateinit var clusterManager: ClusterManager<WcEntityClusterItem>
+    private val placedWcEntities: Set<String> = setOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -191,6 +192,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
             for (wc in allReducedWcEntity) {
 
+                if (wc.lavatoryID in placedWcEntities) continue
+
                 val isFavorite =
                     WcRepository.checkIfFavorite(
                         requireContext(),
@@ -200,6 +203,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
                 val clusterItem = WcEntityClusterItem(wc, isFavorite)
                 clusterManager.addItem(clusterItem)
+
+                placedWcEntities.plus(wc.lavatoryID)
             }
         }
 
