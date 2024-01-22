@@ -190,9 +190,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
 
             for (wc in allReducedWcEntity) {
-                val clusterItem = WcEntityClusterItem(wc.description, wc.latitude, wc.longitude)
-                clusterManager.addItem(clusterItem)
 
+                val isFavorite =
+                    WcRepository.checkIfFavorite(
+                        requireContext(),
+                        wc.lavatoryID,
+                        StatesSingleton.userId
+                    )
+
+                val clusterItem = WcEntityClusterItem(wc, isFavorite)
+                clusterManager.addItem(clusterItem)
             }
         }
 
@@ -356,17 +363,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupBottomSheet(mMap: GoogleMap, item: WcEntityClusterItem) {
-        val wc = WcEntity(
-            lavatoryID = item.description,
-            description = item.description,
-            latitude = item.latitude,
-            longitude = item.longitude,
-            averageRating = item.averageRating,
-            ratingCount = item.ratingCount,
-            userRating = item.userRating,
-        )
+        val wc = item.getWcEntity()
 
-        val favorite = false
+        val favorite = item.isFavorite()
 
         setupBottomSheetContent(wc, favorite)
 
@@ -382,9 +381,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     wcInformationBottomSheet.visibility = View.GONE
                 }
             })
-
-        true
-
     }
 
     private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean) {
