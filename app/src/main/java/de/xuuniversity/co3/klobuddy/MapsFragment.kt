@@ -166,20 +166,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun addItems() {
+        lifecycleScope.launch{
+            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
 
-        // Set some lat/lng coordinates to start with.
-        var lat = 52.51430023974372
-        var lng = 13.410996312009937
-
-        // Add ten cluster items in close proximity, for purposes of this example.
-        for (i in 0..9) {
-            val offset = i / 600.0
-            lat += offset
-            lng += offset
-            val offsetItem =
-                WcEntityClusterItem("Title $i", lat, lng)
-            clusterManager.addItem(offsetItem)
+            for (wc in allReducedWcEntity){
+                val clusterItem = WcEntityClusterItem(wc.description, wc.latitude, wc.longitude)
+                clusterManager.addItem(clusterItem)
+            }
         }
+
     }
 
     private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
