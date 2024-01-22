@@ -43,7 +43,6 @@ object WcRepository {
                         if(averageRating.isNaN()){
                             averageRating = 0.0
                         }
-                        Log.d("DEBUG", document.data.toString())
 
                         val wcEntity = WcEntity(
                             lavatoryID = document.data["LavatoryID"].toString(),

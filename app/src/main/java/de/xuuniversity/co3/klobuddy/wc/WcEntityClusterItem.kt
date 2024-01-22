@@ -1,12 +1,9 @@
 package de.xuuniversity.co3.klobuddy.wc
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 
-@Entity
-data class WcEntity(
-    @PrimaryKey val lavatoryID: String,
+class WcEntityClusterItem (
     val description: String,
     val latitude: Double,
     val longitude: Double,
@@ -25,5 +22,30 @@ data class WcEntity(
     val hasChangingTable: Int? = null,
     val hasUrinal: Int? = null,
     val isOperatedBy: Int? = null,
-    val modelTyp: Int? = null,
-)
+    val modelTyp: Int? = null,): ClusterItem {
+
+
+
+    override fun getPosition(): LatLng {
+        return LatLng(latitude, longitude)
+    }
+
+    override fun getTitle(): String {
+        return description
+    }
+
+    override fun getSnippet(): String {
+        return "Rating: $averageRating"
+    }
+
+    override fun getZIndex(): Float? {
+        return 0f
+    }
+
+    init {
+        println("WcEntityClusterItem: $description")
+
+    }
+
+
+}

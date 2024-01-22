@@ -1,6 +1,7 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
@@ -41,9 +42,11 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.clustering.ClusterManager
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
+import de.xuuniversity.co3.klobuddy.wc.WcEntityClusterItem
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
 import kotlin.math.atan2
@@ -67,6 +70,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private val markersMap = mutableMapOf<String, Marker>()
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: CardView
+    private lateinit var clusterManager: ClusterManager<WcEntityClusterItem>
 
     override fun onCreateView (
         inflater: LayoutInflater, container: ViewGroup?,
@@ -147,7 +151,35 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         setupCamera(mMap)
         setupBottomSheet(mMap)
 
-        placeMarker(_defaultLocation, RADIUS)
+        cluster(mMap)
+        //placeMarker(_defaultLocation, RADIUS)
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
+    private fun cluster (mMap: GoogleMap){
+        clusterManager = ClusterManager(context, mMap)
+
+        mMap.setOnCameraIdleListener(clusterManager)
+        mMap.setOnMarkerClickListener(clusterManager)
+
+        addItems()
+    }
+
+    private fun addItems() {
+
+        // Set some lat/lng coordinates to start with.
+        var lat = 52.51430023974372
+        var lng = 13.410996312009937
+
+        // Add ten cluster items in close proximity, for purposes of this example.
+        for (i in 0..9) {
+            val offset = i / 600.0
+            lat += offset
+            lng += offset
+            val offsetItem =
+                WcEntityClusterItem("Title $i", lat, lng)
+            clusterManager.addItem(offsetItem)
+        }
     }
 
     private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
@@ -243,7 +275,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
             }
 
-            placeMarker(mMap.cameraPosition.target, radius)
+            //placeMarker(mMap.cameraPosition.target, radius)
 
             //Close bottom sheet if open
             if (wcInformationBottomSheet.visibility == View.VISIBLE) {
