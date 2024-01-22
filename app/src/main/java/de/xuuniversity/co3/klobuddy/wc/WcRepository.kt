@@ -20,7 +20,7 @@ object WcRepository {
         return wcDao.getAll()
     }
 
-    suspend fun upsertWcEntitiesFromFireStore(context: Context){
+    suspend fun upsertWcEntitiesFromFireStore(context: Context) {
         val db = Firebase.firestore
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -32,40 +32,30 @@ object WcRepository {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     coroutineScope.launch {
-
-                        val favoriteList: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
-                        val isFavorite = favoriteList?.any { (it is Long && it.toInt() == userId) || (it is Int && it == userId) } ?: false
-
-                        val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
-                        val userRating = userRatings[userId.toString()] ?: 0
+                        val userRatings =
+                            document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
+                        val userRating = 0
                         var averageRating = userRatings.values.average()
                         val ratingCount = userRatings.values.count()
-                        if(averageRating.isNaN()){
+                        if (averageRating.isNaN()) {
                             averageRating = 0.0
                         }
 
                         val wcEntity = WcEntity(
                             lavatoryID = document.data["LavatoryID"].toString(),
                             description = document.data["Description"].toString(),
-                            latitude = document.data["Latitude"].toString().replace(",", ".").toDouble(),
-                            longitude = document.data["Longitude"].toString().replace(",", ".").toDouble(),
+                            latitude = document.data["Latitude"].toString().replace(",", ".")
+                                .toDouble(),
+                            longitude = document.data["Longitude"].toString().replace(",", ".")
+                                .toDouble(),
                             averageRating = averageRating,
                             ratingCount = ratingCount,
-                            userRating = userRating.toInt(),
+                            userRating = userRating,
                         )
 
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
                         val dao = dbInstance.wcDao()
                         dao.upsertWcEntity(wcEntity)
-
-                        if(isFavorite){
-                            val favoriteEntity = FavoriteEntity(
-                                userID = userId,
-                                lavatoryID = document.data["LavatoryID"].toString()
-                            )
-
-                            dao.upsertFavoriteEntity(favoriteEntity)
-                        }
                     }
                 }
             }
@@ -74,7 +64,7 @@ object WcRepository {
             }
     }
 
-    suspend fun upsertUserFavoritesFromFireStore(context: Context){
+    suspend fun upsertUserFavoritesFromFireStore(context: Context) {
         val firestore = Firebase.firestore
 
         val localDb = RoomDatabaseSingleton.getDatabase(context)
@@ -104,10 +94,13 @@ object WcRepository {
             }
     }
 
-    suspend fun upsertUserRatingsFromFireStore(context: Context){
+    suspend fun upsertUserRatingsFromFireStore(context: Context) {
         val firestore = Firebase.firestore
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        val localDb = RoomDatabaseSingleton.getDatabase(context)
+        val dao = localDb.wcDao()
 
         val userId = StatesSingleton.userId
 
@@ -118,10 +111,14 @@ object WcRepository {
                 for (document in result) {
                     coroutineScope.launch {
                         //Update in Room
-                        val userRatings = document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
+                        val userRatings =
+                            document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
                         val userRating = userRatings[userId.toString()] ?: 0
 
-                        saveUserRating(context, document.data["LavatoryID"].toString(), userRating.toFloat())
+                        dao.saveUserRating(
+                            document.data["LavatoryID"].toString(),
+                            userRating.toInt()
+                        )
                     }
                 }
             }
@@ -130,7 +127,7 @@ object WcRepository {
             }
     }
 
-    suspend fun saveUserRating (context: Context, lavatoryID: String, rating: Float){
+    suspend fun saveUserRating(context: Context, lavatoryID: String, rating: Float) {
         val userId = StatesSingleton.userId
 
         //Save locally
@@ -156,7 +153,7 @@ object WcRepository {
     }
 
     //Adds Wc local and online to favorites of user
-    suspend fun addWcToFavorites(context: Context, lavatoryID: String, userID: Int){
+    suspend fun addWcToFavorites(context: Context, lavatoryID: String, userID: Int) {
         //Local
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
@@ -178,11 +175,14 @@ object WcRepository {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     coroutineScope.launch {
-                        val favoriteListFromDatabase: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
-                        val favoriteList = favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
-                        val isFavorite = favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
+                        val favoriteListFromDatabase: ArrayList<*>? =
+                            document.data["userFavorites"] as ArrayList<*>?
+                        val favoriteList =
+                            favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
+                        val isFavorite =
+                            favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
 
-                        if(!isFavorite){
+                        if (!isFavorite) {
                             favoriteList.add(userID)
                             document.reference.update("userFavorites", favoriteList)
                         }
@@ -196,7 +196,7 @@ object WcRepository {
     }
 
     //Removes Wc local and online from favorites of user
-    suspend fun removeWcFromFavorites(context: Context, lavatoryID: String, userID: Int){
+    suspend fun removeWcFromFavorites(context: Context, lavatoryID: String, userID: Int) {
         //Local
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
@@ -213,14 +213,17 @@ object WcRepository {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     coroutineScope.launch {
-                        val favoriteListFromDatabase: ArrayList<*>? = document.data["userFavorites"] as ArrayList<*>?
-                        val favoriteList = favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
-                        val isFavorite = favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
+                        val favoriteListFromDatabase: ArrayList<*>? =
+                            document.data["userFavorites"] as ArrayList<*>?
+                        val favoriteList =
+                            favoriteListFromDatabase?.toMutableList() ?: mutableListOf()
+                        val isFavorite =
+                            favoriteList.any { (it is Long && it.toInt() == userID) || (it is Int && it == userID) }
 
                         Log.d("DEBUG", "isFavorite: $isFavorite")
 
 
-                        if(isFavorite){
+                        if (isFavorite) {
                             favoriteList.remove(userID.toLong())
                             document.reference.update("userFavorites", favoriteList)
                         }
@@ -239,14 +242,25 @@ object WcRepository {
         return wcDao.checkIfFavorite(lavatoryID, userID)
     }
 
-    suspend fun updateAverageRating (context: Context, lavatoryID: String, averageRating: Double, ratingCount: Int){
+    suspend fun updateAverageRating(
+        context: Context,
+        lavatoryID: String,
+        averageRating: Double,
+        ratingCount: Int
+    ) {
         val db = RoomDatabaseSingleton.getDatabase(context)
         val wcDao = db.wcDao()
 
-        Log.d("DEBUG", "Average rating updates locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+        Log.d(
+            "DEBUG",
+            "Average rating updates locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount"
+        )
 
         wcDao.updateAverageRating(lavatoryID, averageRating, ratingCount)
-        Log.d("DEBUG", "Average rating updated locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount")
+        Log.d(
+            "DEBUG",
+            "Average rating updated locally, lavatoryID: $lavatoryID, averageRating: $averageRating, ratingCount: $ratingCount"
+        )
     }
 
     suspend fun getAllFavoritesByUserID(context: Context, userID: Int): List<WcEntity> {
