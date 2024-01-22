@@ -585,14 +585,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         ratingCount++
                         Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
 
-                        //Update Rating
-                        val updatedWc = wc.copy(
-                            userRating = rating.toInt(),
-                            averageRating = averageRating,
-                            ratingCount = ratingCount
-                        )
-                        markersMap[wc.lavatoryID]?.tag =
-                            mapOf("entity" to updatedWc, "favorite" to favorite)
+                        //Update entity
+                        wc.userRating = rating.toInt()
+                        wc.averageRating = averageRating
+                        wc.ratingCount = ratingCount
 
                         //Save in local DB
                         WcRepository.updateAverageRating(
