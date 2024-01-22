@@ -186,7 +186,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             true
         }
 
-        addItems(RADIUS)
+        val zoomLevel = mMap.cameraPosition.zoom
+        addItems(getRadiusForZoomLevel(zoomLevel))
     }
 
     private fun addItems(radius: Double) {
@@ -201,11 +202,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val onlyNewWcEntities =
                 allWcEntities.filterNot { it.lavatoryID in placedWcEntities }
             val filteredWcEntities =
-                filterLocations(onlyNewWcEntities, StatesSingleton.cameraPosition?.target ?: _defaultLocation, radius)
+                filterLocations(
+                    onlyNewWcEntities,
+                    StatesSingleton.cameraPosition?.target ?: _defaultLocation,
+                    radius
+                )
 
             for (wc in filteredWcEntities) {
 
-                if(wc.lavatoryID in placedWcEntities){
+                if (wc.lavatoryID in placedWcEntities) {
                     continue
                 }
 
@@ -221,7 +226,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
                 placedWcEntities = placedWcEntities.plus(wc.lavatoryID)
                 Log.d("DEBUG", "Placed WcEntities: ${clusterItem.getWcEntity().lavatoryID}")
-                //Todo: Move maybe outside of loop
             }
             clusterManager.cluster()
 
@@ -315,30 +319,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private fun setupCamera(mMap: GoogleMap) {
         mMap.setOnCameraMoveListener {
             val zoomLevel = mMap.cameraPosition.zoom
-            val radius: Double
-            when {
-                zoomLevel < 13 -> {
-                    radius = RADIUS * 11
-                }
-
-                zoomLevel < 14 -> {
-                    radius = RADIUS * 7
-                }
-
-                zoomLevel < 15 -> {
-                    radius = RADIUS * 4
-                }
-
-                zoomLevel < 16 -> {
-                    radius = RADIUS * 2
-                }
-
-                else -> {
-                    radius = RADIUS
-                }
-            }
-
-            addItems(radius)
+            addItems(getRadiusForZoomLevel(zoomLevel))
 
             //Close bottom sheet if open
             if (wcInformationBottomSheet.visibility == View.VISIBLE) {
@@ -647,5 +628,29 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
             .create()
             .show()
+    }
+
+    private fun getRadiusForZoomLevel(zoomLevel: Float): Double {
+        return when {
+            zoomLevel < 13 -> {
+                RADIUS * 11
+            }
+
+            zoomLevel < 14 -> {
+                RADIUS * 7
+            }
+
+            zoomLevel < 15 -> {
+                RADIUS * 4
+            }
+
+            zoomLevel < 16 -> {
+                RADIUS * 2
+            }
+
+            else -> {
+                RADIUS
+            }
+        }
     }
 }
