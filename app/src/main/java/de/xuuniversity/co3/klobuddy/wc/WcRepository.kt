@@ -25,9 +25,7 @@ object WcRepository {
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        val userId = StatesSingleton.userId
-
-        db.collection("toilettes")
+        db.collection("WCEntity")
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
@@ -51,11 +49,29 @@ object WcRepository {
                             averageRating = averageRating,
                             ratingCount = ratingCount,
                             userRating = userRating,
-                        )
+                            city = document.data["City"]?.toString(),
+                            street = document.data["Street"]?.toString(),
+                            postalCode = document.data["PostalCode"]?.toString()?.toInt(),
+                            country = document.data["Country"]?.toString(),
+                            isHandicappedAccessible = document.data["IsHandicappedAccessible"]?.toString()
+                                ?.toInt(),
 
+                            canBePayedWithCoins = document.data["CanBePayedWithCoins"]?.toString()
+                                ?.toInt(),
+                            canBePayedInApp = document.data["CanBePayedInApp"]?.toString()?.toInt(),
+                            canBePayedWithNFC = document.data["CanBePayedWithNFC"]?.toString()
+                                ?.toInt(),
+                            hasChangingTable = document.data["HasChangingTable"]?.toString()
+                                ?.toInt(),
+                            hasUrinal = document.data["HasUrinal"]?.toString()?.toInt(),
+                            isOperatedBy = document.data["IsOperatedBy"]?.toString()?.toInt(),
+                            modelTyp = document.data["ModelTyp"]?.toString()?.toInt(),
+                            price = document.data["Price"]?.toString()?.toDouble()
+                        )
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)
                         val dao = dbInstance.wcDao()
                         dao.upsertWcEntity(wcEntity)
+
                     }
                 }
             }
