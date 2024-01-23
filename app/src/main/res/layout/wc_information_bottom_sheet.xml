@@ -37,7 +37,9 @@
                     android:layout_height="wrap_content"
                     android:text="@string/bottom_sheet_description"
                     android:textSize="24sp"
-                    style="@style/TextAppearance.AppCompat.Large" />
+                    style="@style/TextAppearance.AppCompat.Large"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
