@@ -3,7 +3,6 @@ package de.xuuniversity.co3.klobuddy
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -67,8 +66,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
-    private var placedMarker: List<WcEntity> = listOf()
-    private val markersMap = mutableMapOf<String, Marker>()
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: CardView
     private lateinit var clusterManager: ClusterManager<WcEntityClusterItem>
@@ -264,44 +261,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         return resultLocations
     }
 
-    private fun placeMarker(cameraPosition: LatLng, radius: Double) {
-        val userId = StatesSingleton.userId
-
-        lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
-            val newReducedWcEntities =
-                allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
-            val filteredReducedWcEntities =
-                filterLocations(newReducedWcEntities, cameraPosition, radius)
-
-            for (wc in filteredReducedWcEntities) {
-
-                val isFavorite =
-                    WcRepository.checkIfFavorite(requireContext(), wc.lavatoryID, userId)
-
-                val marker = mMap.addMarker(
-                    MarkerOptions()
-                        .position(LatLng(wc.latitude, wc.longitude))
-                        .title(wc.description)
-                        .icon(
-                            BitmapDescriptorFactory.fromBitmap(
-                                Util.convertDrawableToBitmap(
-                                    activity as Context,
-                                    R.drawable.outline_wc_24
-                                )
-                            )
-                        )
-                )
-                marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
-
-                markersMap[wc.lavatoryID] = marker!!
-
-            }
-
-            placedMarker += filteredReducedWcEntities
-        }
-    }
-
     private fun setupMapUI(mMap: GoogleMap) {
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isZoomGesturesEnabled = true
@@ -421,13 +380,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
         handleThemeOnPeekIcons(iconList, icons)
-        setupContent(wc, iconList)
+        fillBottomSheetContent(wc, iconList)
         handleFavoriteButtonAndRating(wc, initialFavorite)
-        handleRatingBar(wc, initialFavorite)
+        handleRatingBar(wc)
     }
 
 
-    private fun setupContent(wc: WcEntity, iconList: List<String>) {
+    private fun fillBottomSheetContent(wc: WcEntity, iconList: List<String>) {
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_bottom_sheet_description)?.text = wc.description
         if (wc.street != null && wc.postalCode != null && wc.city != null) {
@@ -545,7 +504,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun handleRatingBar(wc: WcEntity, favorite: Boolean = false) {
+    private fun handleRatingBar(wc: WcEntity) {
         var isProgrammaticChange = false
         val oldUserRating = wc.userRating ?: 0
         view?.findViewById<RatingBar>(R.id.ratingBar)
