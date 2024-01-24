@@ -75,8 +75,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/placeholder"
-                app:drawableLeftCompat="@drawable/baseline_attach_money_24"
-                android:visibility="gone" />
+                android:visibility="visible"
+                app:drawableLeftCompat="@drawable/baseline_attach_money_24" />
 
             <TextView
                 android:id="@+id/wc_bottom_sheet_changing_table"
