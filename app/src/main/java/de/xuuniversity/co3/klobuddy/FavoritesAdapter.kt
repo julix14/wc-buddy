@@ -10,12 +10,20 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
+import android.util.Log
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 
 
 class FavoritesAdapter(
     private val items: List<WcEntity>,
-    private val context: Context
+    private val context: Context,
+    private val callback: FavoritesAdapterCallback
 ): RecyclerView.Adapter<FavoritesViewHolder>() {
+    interface FavoritesAdapterCallback {
+        fun onNavigateToMap()
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoritesViewHolder {
         val view : View = LayoutInflater.from(context).inflate(R.layout.favorite_item, parent, false)
 
@@ -29,11 +37,18 @@ class FavoritesAdapter(
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val item = items[position]
 
-        // ...
-
         // Get the drawableLeftCompat of the TextView
         val drawableLeft = holder.ratingView.compoundDrawables[0]
         val imageNavigationButton = holder.ratingNavButton.drawable
+
+        holder.ratingNavButton.setOnClickListener{
+            Log.d("FavoritesAdapter", "Navigation button clicked ${item}")
+            //Set the destination
+            StatesSingleton.cameraPosition = CameraPosition(LatLng(item.latitude, item.longitude), 17f, 0f, 0f)
+
+            //Navigate to map
+            callback.onNavigateToMap()
+        }
 
         if (drawableLeft != null) {
             // Create a Drawable wrapper
@@ -51,8 +66,8 @@ class FavoritesAdapter(
 
             } else {
                 // Remove the color filter to show the original color of the Drawable wrapper
-                DrawableCompat.setTintList(drawableWrapper, null)
-                DrawableCompat.setTintList(imageButtonWrapper, null)
+                DrawableCompat.setTintList(drawableWrapper, ColorStateList.valueOf(Color.BLACK))
+                DrawableCompat.setTintList(imageButtonWrapper, ColorStateList.valueOf(Color.BLACK))
             }
 
             // Set the Drawable wrapper as the drawableLeftCompat of the TextView

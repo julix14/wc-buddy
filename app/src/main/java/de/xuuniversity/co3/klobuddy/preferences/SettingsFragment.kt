@@ -5,7 +5,9 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.R
 
 class SettingsFragment : PreferenceFragmentCompat(),
@@ -34,6 +36,23 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
 
         }
+        val signOutPreference: Preference? = findPreference("sign_out_preference")
+        signOutPreference?.setOnPreferenceClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.sign_out_dialog_title)
+                .setMessage(R.string.sign_out_dialog_message)
+                .setPositiveButton(R.string.dialog_option_yes) { _, _ ->
+                    FirebaseAuth.getInstance().signOut()
+                    activity?.finish()
+                }
+                .setNegativeButton(R.string.dialog_option_no) { dialog, _ ->
+                    dialog.dismiss()
+                    isDialogShown = false
+                }
+                .show()
+
+            true
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -41,13 +60,13 @@ class SettingsFragment : PreferenceFragmentCompat(),
             isDialogShown = true
             // Show an alert dialog
             AlertDialog.Builder(requireContext())
-                .setTitle("Theme Changed")
-                .setMessage("Please restart the app for the changes to take effect.")
-                .setPositiveButton("Restart") { _, _ ->
+                .setTitle(R.string.theme_change_dialog_title)
+                .setMessage(R.string.theme_change_dialog_message)
+                .setPositiveButton(R.string.dialog_option_restart) { _, _ ->
                     // Restart the app
                     activity?.finish()
                 }
-                .setNegativeButton("Later") { dialog, _ ->
+                .setNegativeButton(R.string.dialog_option_later) { dialog, _ ->
                     dialog.dismiss()
                     isDialogShown = false
                 }
