@@ -8,6 +8,7 @@ import com.google.firebase.firestore.firestore
 import de.xuuniversity.co3.klobuddy.favorite.FavoriteEntity
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton.userId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ object WcRepository {
                     coroutineScope.launch {
                         val userRatings =
                             document.data["userRatings"] as? Map<String, Long> ?: emptyMap()
-                        val userRating = 0
+                        val userRating = userRatings[userId.toString()]?.toInt() ?: 0
                         var averageRating = userRatings.values.average()
                         val ratingCount = userRatings.values.count()
                         if (averageRating.isNaN()) {

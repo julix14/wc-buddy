@@ -10,11 +10,5 @@ import kotlinx.coroutines.launch
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
-        coroutineScope.launch {
-            WcRepository.upsertWcEntitiesFromFireStore(this@MyApp)
-        }
-
     }
 }
