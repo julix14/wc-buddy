@@ -1,8 +1,8 @@
 package de.xuuniversity.co3.klobuddy
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -41,11 +41,14 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.clustering.ClusterManager
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
+import de.xuuniversity.co3.klobuddy.wc.WcEntityClusterItem
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -63,12 +66,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private lateinit var mMap: GoogleMap
     private lateinit var binding: FragmentMapsBinding
-    private var placedMarker : List<WcEntity> = listOf()
-    private val markersMap = mutableMapOf<String, Marker>()
     private var cameraPosition: CameraPosition? = StatesSingleton.cameraPosition
     private lateinit var wcInformationBottomSheet: CardView
+    private lateinit var clusterManager: ClusterManager<WcEntityClusterItem>
+    private var placedWcEntities: Set<String> = setOf()
 
-    override fun onCreateView (
+    private val lastMapCallTime = AtomicLong(0)
+    private val delayBetweenMapCalls = 500
+
+    override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
@@ -79,7 +85,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireContext())
         checkLocationPermissionAndRetrieveLocation()
 
         wcInformationBottomSheet = view.findViewById(R.id.bottom_sheet_layout)
@@ -88,30 +95,36 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
 
     override fun onPause() {
-        if(::mMap.isInitialized){
+        if (::mMap.isInitialized) {
             StatesSingleton.cameraPosition = mMap.cameraPosition
         }
 
         super.onPause()
     }
 
-    private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            getLastLocation()
-        } else {
-            showLocationPermissionExplanation()
+    private val locationPermissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                getLastLocation()
+            } else {
+                showLocationPermissionExplanation()
+            }
         }
-    }
 
     private fun checkLocationPermissionAndRetrieveLocation() {
         when {
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
                 getLastLocation()
             }
+
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 // Show an explanation to the user and try again
                 showLocationPermissionExplanation()
             }
+
             else -> {
                 locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
@@ -131,13 +144,22 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 }
 
                 currentLocation = locationResult.lastLocation
-                val mapFragment = childFragmentManager.findFragmentById(R.id.activity_map) as SupportMapFragment
+                val mapFragment =
+                    childFragmentManager.findFragmentById(R.id.activity_map) as SupportMapFragment
                 mapFragment.getMapAsync(this@MapsFragment)
             }
         }
 
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, null)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationProviderClient!!.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                null
+            )
         }
     }
 
@@ -145,12 +167,74 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap = googleMap
         setupMapUI(mMap)
         setupCamera(mMap)
-        setupBottomSheet(mMap)
 
-        placeMarker(_defaultLocation, RADIUS)
+        cluster(mMap)
     }
 
-    private fun filterLocations(locations: List<WcEntity>, cameraPosition: LatLng, radius: Double): List<WcEntity> {
+    @SuppressLint("PotentialBehaviorOverride")
+    private fun cluster(mMap: GoogleMap) {
+        clusterManager = ClusterManager(context, mMap)
+
+        mMap.setOnCameraIdleListener(clusterManager)
+        mMap.setOnMarkerClickListener(clusterManager)
+
+        clusterManager.setOnClusterItemClickListener { item ->
+            setupBottomSheet(mMap, item)
+            true
+        }
+
+        val zoomLevel = mMap.cameraPosition.zoom
+        addItems(getRadiusForZoomLevel(zoomLevel))
+    }
+
+    private fun addItems(radius: Double) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastMapCallTime.get() < delayBetweenMapCalls) {
+            return
+        }
+        lastMapCallTime.set(currentTime)
+
+        lifecycleScope.launch {
+            val allWcEntities = WcRepository.getAllWcEntities(requireActivity())
+            val onlyNewWcEntities =
+                allWcEntities.filterNot { it.lavatoryID in placedWcEntities }
+            val filteredWcEntities =
+                filterLocations(
+                    onlyNewWcEntities,
+                    StatesSingleton.cameraPosition?.target ?: _defaultLocation,
+                    radius
+                )
+
+            for (wc in filteredWcEntities) {
+
+                if (wc.lavatoryID in placedWcEntities) {
+                    continue
+                }
+
+                val isFavorite =
+                    WcRepository.checkIfFavorite(
+                        requireContext(),
+                        wc.lavatoryID,
+                        StatesSingleton.userId
+                    )
+
+                val clusterItem = WcEntityClusterItem(wc, isFavorite)
+                clusterManager.addItem(clusterItem)
+
+                placedWcEntities = placedWcEntities.plus(wc.lavatoryID)
+                Log.d("DEBUG", "Placed WcEntities: ${clusterItem.getWcEntity().lavatoryID}")
+            }
+            clusterManager.cluster()
+
+        }
+
+    }
+
+    private fun filterLocations(
+        locations: List<WcEntity>,
+        cameraPosition: LatLng,
+        radius: Double
+    ): List<WcEntity> {
         val resultLocations = mutableListOf<WcEntity>()
 
         val baseLatRad = Math.toRadians(cameraPosition.latitude)
@@ -163,7 +247,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             val deltaLat = latRad - baseLatRad
             val deltaLon = lonRad - baseLonRad
 
-            val a = sin(deltaLat / 2).pow(2) + cos(baseLatRad) * cos(latRad) * sin(deltaLon / 2).pow(2)
+            val a =
+                sin(deltaLat / 2).pow(2) + cos(baseLatRad) * cos(latRad) * sin(deltaLon / 2).pow(2)
             val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
             val distanceInKilometers = 6371 * c // Radius of the Earth in kilometers
@@ -176,34 +261,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         return resultLocations
     }
 
-    private fun placeMarker(cameraPosition: LatLng, radius: Double){
-        val userId = StatesSingleton.userId
-
-        lifecycleScope.launch {
-            val allReducedWcEntity = WcRepository.getAllWcEntities(requireActivity())
-            val newReducedWcEntities = allReducedWcEntity.toSet().minus(placedMarker.toSet()).toList()
-            val filteredReducedWcEntities = filterLocations(newReducedWcEntities, cameraPosition, radius)
-
-            for (wc in filteredReducedWcEntities){
-
-                val isFavorite = WcRepository.checkIfFavorite(requireContext(), wc.lavatoryID, userId)
-
-                val marker = mMap.addMarker(MarkerOptions()
-                    .position(LatLng(wc.latitude, wc.longitude))
-                    .title(wc.description)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(activity as Context, R.drawable.outline_wc_24)))
-                )
-                marker?.tag = mapOf("entity" to wc, "favorite" to isFavorite)
-
-                markersMap[wc.lavatoryID] = marker!!
-
-            }
-
-            placedMarker += filteredReducedWcEntities
-        }
-    }
-
-    private fun setupMapUI(mMap: GoogleMap){
+    private fun setupMapUI(mMap: GoogleMap) {
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isScrollGesturesEnabled = true
@@ -217,38 +275,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         mMap.setLatLngBoundsForCameraTarget(LatLngBounds(LatLng(52.3, 13.0), LatLng(52.7, 13.8)))
     }
 
-    private fun setupCamera(mMap: GoogleMap){
+    private fun setupCamera(mMap: GoogleMap) {
         mMap.setOnCameraMoveListener {
             val zoomLevel = mMap.cameraPosition.zoom
-            val radius: Double
-            when {
-                zoomLevel < 13 -> {
-                    radius = RADIUS * 11
-                }
-
-                zoomLevel < 14 -> {
-                    radius = RADIUS * 7
-                }
-
-                zoomLevel < 15 -> {
-                    radius = RADIUS * 4
-                }
-
-                zoomLevel < 16 -> {
-                    radius = RADIUS * 2
-                }
-
-                else -> {
-                    radius = RADIUS
-                }
-            }
-
-            placeMarker(mMap.cameraPosition.target, radius)
+            addItems(getRadiusForZoomLevel(zoomLevel))
 
             //Close bottom sheet if open
             if (wcInformationBottomSheet.visibility == View.VISIBLE) {
                 wcInformationBottomSheet.visibility = View.GONE
-                BottomSheetBehavior.from(wcInformationBottomSheet).state = BottomSheetBehavior.STATE_COLLAPSED
+                BottomSheetBehavior.from(wcInformationBottomSheet).state =
+                    BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
@@ -258,7 +294,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             _defaultLocation
         }
 
-        if(cameraPosition != null)
+        if (cameraPosition != null)
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition!!))
         else {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -275,40 +311,40 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        mMap.addMarker(MarkerOptions()
-            .position(location)
-            .icon(BitmapDescriptorFactory.fromBitmap(Util.convertDrawableToBitmap(requireContext(), R.drawable.outline_my_location_24)))
-            .title("Current Location")
+        mMap.addMarker(
+            MarkerOptions()
+                .position(location)
+                .icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        Util.convertDrawableToBitmap(
+                            requireContext(),
+                            R.drawable.outline_my_location_24
+                        )
+                    )
+                )
+                .title("Current Location")
         )
     }
 
-    private fun setupBottomSheet(mMap: GoogleMap){
-        mMap.setOnMarkerClickListener {
-            if (it.tag == null) return@setOnMarkerClickListener (false)
+    private fun setupBottomSheet(mMap: GoogleMap, item: WcEntityClusterItem) {
+        val wc = item.getWcEntity()
 
-            val tag = it.tag as Map<*, *>
-            val tagWc = tag["entity"] as WcEntity
-            val markerTag = markersMap[tagWc.lavatoryID]?.tag as Map<*, *>? ?: return@setOnMarkerClickListener (false)
-            val wc = markerTag["entity"] as WcEntity
-            val favorite = markerTag["favorite"] as Boolean
+        val favorite = item.isFavorite()
 
-            setupBottomSheetContent(wc, favorite)
+        setupBottomSheetContent(wc, favorite)
 
-            mMap.animateCamera(
-                CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)),
-                250,
-                object : GoogleMap.CancelableCallback {
-                    override fun onFinish() {
-                        wcInformationBottomSheet.visibility = View.VISIBLE
-                    }
+        mMap.animateCamera(
+            CameraUpdateFactory.newLatLng(LatLng(wc.latitude, wc.longitude)),
+            250,
+            object : GoogleMap.CancelableCallback {
+                override fun onFinish() {
+                    wcInformationBottomSheet.visibility = View.VISIBLE
+                }
 
-                    override fun onCancel() {
-                        wcInformationBottomSheet.visibility = View.GONE
-                    }
-                })
-
-            true
-        }
+                override fun onCancel() {
+                    wcInformationBottomSheet.visibility = View.GONE
+                }
+            })
     }
 
     private fun setupBottomSheetContent(wc: WcEntity, initialFavorite: Boolean) {
@@ -325,11 +361,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 "no_fee" to R.drawable.baseline_money_off_24
             )
         )
+
+        Log.d("DEBUG", "Wc: $wc")
         // Select icons to display
         val iconList = mutableListOf<String>()
-        if (wc.hasChangingTable != null) iconList.add("changing_table")
-        if (wc.hasUrinal != null) iconList.add("urinal")
-        if (wc.isHandicappedAccessible != null) iconList.add("wheelchair")
+        if (wc.hasChangingTable == 1) iconList.add("changing_table")
+        if (wc.hasUrinal == 1) iconList.add("urinal")
+        if (wc.isHandicappedAccessible == 1) iconList.add("wheelchair")
         when (wc.averageRating) {
             in 0.0..1.9 -> iconList.add("poorRating")
             in 2.0..3.9 -> iconList.add("middleRating")
@@ -342,13 +380,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
         }
         handleThemeOnPeekIcons(iconList, icons)
-        setupContent(wc, iconList)
+        fillBottomSheetContent(wc, iconList)
         handleFavoriteButtonAndRating(wc, initialFavorite)
-        handleRatingBar(wc, initialFavorite)
+        handleRatingBar(wc)
     }
 
 
-    private fun setupContent(wc: WcEntity, iconList: List<String>) {
+    private fun fillBottomSheetContent(wc: WcEntity, iconList: List<String>) {
         // Write data to bottom sheet
         view?.findViewById<TextView>(R.id.wc_bottom_sheet_description)?.text = wc.description
         if (wc.street != null && wc.postalCode != null && wc.city != null) {
@@ -466,7 +504,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun handleRatingBar(wc: WcEntity, favorite: Boolean = false) {
+    private fun handleRatingBar(wc: WcEntity) {
         var isProgrammaticChange = false
         val oldUserRating = wc.userRating ?: 0
         view?.findViewById<RatingBar>(R.id.ratingBar)
@@ -488,14 +526,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         ratingCount++
                         Log.d("DEBUG", "Old Rating: $oldUserRating, New Rating: $averageRating")
 
-                        //Update Rating
-                        val updatedWc = wc.copy(
-                            userRating = rating.toInt(),
-                            averageRating = averageRating,
-                            ratingCount = ratingCount
-                        )
-                        markersMap[wc.lavatoryID]?.tag =
-                            mapOf("entity" to updatedWc, "favorite" to favorite)
+                        //Update entity
+                        wc.userRating = rating.toInt()
+                        wc.averageRating = averageRating
+                        wc.ratingCount = ratingCount
 
                         //Save in local DB
                         WcRepository.updateAverageRating(
@@ -551,9 +585,33 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .setTitle(R.string.out_of_bounds_title)
             .setMessage(R.string.out_of_bounds_message)
             .setPositiveButton("OK") { _, _ ->
-              return@setPositiveButton
+                return@setPositiveButton
             }
             .create()
             .show()
+    }
+
+    private fun getRadiusForZoomLevel(zoomLevel: Float): Double {
+        return when {
+            zoomLevel < 13 -> {
+                RADIUS * 11
+            }
+
+            zoomLevel < 14 -> {
+                RADIUS * 7
+            }
+
+            zoomLevel < 15 -> {
+                RADIUS * 4
+            }
+
+            zoomLevel < 16 -> {
+                RADIUS * 2
+            }
+
+            else -> {
+                RADIUS
+            }
+        }
     }
 }

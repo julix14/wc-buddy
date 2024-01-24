@@ -2,6 +2,7 @@ package de.xuuniversity.co3.klobuddy.wc
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.maps.android.clustering.ClusterItem
 
 @Entity
 data class WcEntity(
@@ -9,9 +10,9 @@ data class WcEntity(
     val description: String,
     val latitude: Double,
     val longitude: Double,
-    val averageRating: Double = 0.0,
-    val ratingCount: Int = 0,
-    val userRating: Int? = 0,
+    var averageRating: Double = 0.0,
+    var ratingCount: Int = 0,
+    var userRating: Int? = 0,
     val city: String? = null,
     val street: String? = null,
     val postalCode: Int? = null,
