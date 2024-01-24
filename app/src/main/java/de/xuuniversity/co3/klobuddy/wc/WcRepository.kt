@@ -89,7 +89,7 @@ object WcRepository {
 
         val userId = StatesSingleton.userId
 
-        firestore.collection("toilettes")
+        firestore.collection("WCEntity")
             .whereArrayContains("userFavorites", userId)
             .get()
             .addOnSuccessListener { result ->
@@ -120,7 +120,7 @@ object WcRepository {
 
         val userId = StatesSingleton.userId
 
-        firestore.collection("toilettes")
+        firestore.collection("WCEntity")
             .orderBy("userRatings.$userId")
             .get()
             .addOnSuccessListener { result ->
@@ -158,7 +158,7 @@ object WcRepository {
 
         val updates = mapOf("userRatings.$userId" to rating.toInt())
 
-        firestore.collection("toilettes").document(lavatoryID)
+        firestore.collection("WCEntity").document(lavatoryID)
             .update(updates)
             .addOnSuccessListener {
                 Log.d("DEBUG", "User rating saved online")
@@ -185,7 +185,7 @@ object WcRepository {
         val firestore = Firebase.firestore
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        firestore.collection("toilettes")
+        firestore.collection("WCEntity")
             .whereEqualTo("LavatoryID", lavatoryID)
             .get()
             .addOnSuccessListener { result ->
@@ -223,7 +223,7 @@ object WcRepository {
         val firestore = Firebase.firestore
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-        firestore.collection("toilettes")
+        firestore.collection("WCEntity")
             .whereEqualTo("LavatoryID", lavatoryID)
             .get()
             .addOnSuccessListener { result ->
