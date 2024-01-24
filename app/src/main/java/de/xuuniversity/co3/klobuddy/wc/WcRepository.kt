@@ -53,19 +53,19 @@ object WcRepository {
                             street = document.data["Street"]?.toString(),
                             postalCode = document.data["PostalCode"]?.toString()?.toInt(),
                             country = document.data["Country"]?.toString(),
-                            isHandicappedAccessible = document.data["IsHandicappedAccessible"]?.toString()
+                            isHandicappedAccessible = document.data["isHandicappedAccessible"]?.toString()
                                 ?.toInt(),
 
-                            canBePayedWithCoins = document.data["CanBePayedWithCoins"]?.toString()
+                            canBePayedWithCoins = document.data["canBePayedWithCoins"]?.toString()
                                 ?.toInt(),
-                            canBePayedInApp = document.data["CanBePayedInApp"]?.toString()?.toInt(),
-                            canBePayedWithNFC = document.data["CanBePayedWithNFC"]?.toString()
+                            canBePayedInApp = document.data["canBePayedInApp"]?.toString()?.toInt(),
+                            canBePayedWithNFC = document.data["canBePayedWithNFC"]?.toString()
                                 ?.toInt(),
-                            hasChangingTable = document.data["HasChangingTable"]?.toString()
+                            hasChangingTable = document.data["hasChangingTable"]?.toString()
                                 ?.toInt(),
-                            hasUrinal = document.data["HasUrinal"]?.toString()?.toInt(),
-                            isOperatedBy = document.data["IsOperatedBy"]?.toString()?.toInt(),
-                            modelTyp = document.data["ModelTyp"]?.toString()?.toInt(),
+                            hasUrinal = document.data["hasUrinal"]?.toString()?.toInt(),
+                            isOperatedBy = document.data["isOperatedBy"]?.toString()?.toInt(),
+                            modelTyp = document.data["modelTyp"]?.toString()?.toInt(),
                             price = document.data["Price"]?.toString()?.toDouble()
                         )
                         val dbInstance = RoomDatabaseSingleton.getDatabase(context)

@@ -402,11 +402,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                 "no_fee" to R.drawable.baseline_money_off_24
             )
         )
+
+        Log.d("DEBUG", "Wc: $wc")
         // Select icons to display
         val iconList = mutableListOf<String>()
-        if (wc.hasChangingTable != null) iconList.add("changing_table")
-        if (wc.hasUrinal != null) iconList.add("urinal")
-        if (wc.isHandicappedAccessible != null) iconList.add("wheelchair")
+        if (wc.hasChangingTable == 1) iconList.add("changing_table")
+        if (wc.hasUrinal == 1) iconList.add("urinal")
+        if (wc.isHandicappedAccessible == 1) iconList.add("wheelchair")
         when (wc.averageRating) {
             in 0.0..1.9 -> iconList.add("poorRating")
             in 2.0..3.9 -> iconList.add("middleRating")
