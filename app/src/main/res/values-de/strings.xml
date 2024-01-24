@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">KloBuddy</string>
     <string name="action_menu_favorites">Favoriten</string>
@@ -14,16 +13,41 @@
     <string name="bottom_sheet_description">WC BESCHREIBUNG</string>
     <string name="placeholder">PLATZHALTER</string>
 
+    <!-- Bottom sheet -->
+    <string name="has_changing_table">Wickeltisch verfügbar</string>
+    <string name="wheelchair_accessible">Rollstuhlgerecht</string>
+    <string name="has_urinal">Urinal vorhanden</string>
+    <string name="no_fee">Kostenlos nutzbar</string>
+
+    <!-- Preferences -->
     <string name="preferences_general_category_title">Allgemein</string>
-    <string name="preferences_theme_title">Thema</string>
-    <string name="preferences_theme_summary">Wählen Sie Ihr bevorzugtes Thema</string>
+    <string name="preferences_theme_title">Design</string>
+    <string name="preferences_theme_summary">Wählen Sie Ihr bevorzugtes Design</string>
     <string-array name="preferences_themeOptions">
         <item>Hell</item>
         <item>Dunkel</item>
         <item>Systemstandard</item>
     </string-array>
     <string name="preferences_zoom_level_title">Zoomstufe</string>
-    <string name="preferences_zoom_level_summary">Wählen Sie Ihre bevorzugte Standardzoomstufe</string>
+    <string name="preferences_zoom_level_summary">Wählen Sie Ihre bevorzugte Standard-Zoomstufe</string>
+    <string name="location_permission_title">Standortberechtigung erforderlich</string>
+    <string name="location_permission_message">Diese App benötigt die Standortberechtigung, um ordnungsgemäß zu funktionieren. Bitte erteilen Sie die Berechtigung.</string>
+    <string name="out_of_bounds_title">Standort außerhalb des Bereichs</string>
+    <string name="out_of_bounds_message">Sie befinden sich derzeit außerhalb des unterstützten Bereichs. Nur in Berlin sind alle Funktionen verfügbar.</string>
+    <string name="error_authentification_failed">Authentifizierung fehlgeschlagen. Bitte versuchen Sie es erneut</string>
+    <string name="preferences_user_preferences_category_title">Benutzereinstellungen</string>
+    <string name="preferences_sign_out_title">Abmelden</string>
+    <string name="preferences_sign_out_summary">Melden Sie sich mit Ihrem Google-Konto von dieser App ab</string>
+    <string name="sign_out_dialog_title">Sind Sie sicher?</string>
+    <string name="sign_out_dialog_message">Möchten Sie sich wirklich abmelden?</string>
+    <string name="dialog_option_yes">Ja</string>
+    <string name="dialog_option_no">Nein</string>
+    <string name="theme_change_dialog_title">Design geändert</string>
+    <string name="theme_change_dialog_message">Bitte starten Sie die App neu, damit die Änderungen wirksam werden.</string>
+    <string name="dialog_option_restart">Neustart</string>
+    <string name="dialog_option_later">Später</string>
+    <string name="sign_in_with_google">Klicken Sie hier, um sich anzumelden oder zu registrieren</string>
+    <string name="sign_in_to_continue">Bitte melden Sie sich mit Ihrem Google-Konto an, um KloBuddy zu nutzen</string>
     <string-array name="preferences_zoom_level_entries">
         <item>Nah</item>
         <item>Normal</item>
