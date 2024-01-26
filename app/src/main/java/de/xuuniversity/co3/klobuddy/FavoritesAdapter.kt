@@ -3,17 +3,17 @@ package de.xuuniversity.co3.klobuddy
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
-import de.xuuniversity.co3.klobuddy.wc.WcEntity
-import android.util.Log
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
+import de.xuuniversity.co3.klobuddy.wc.WcEntity
 
 
 class FavoritesAdapter(
@@ -79,8 +79,8 @@ class FavoritesAdapter(
             )
         }
         holder.nameView.text = item.description
-        val rounded = String.format("%.1f", item.averageRating).toDouble()
-        holder.ratingView.text = rounded.toString()
+        val rounded = String.format("%.1f", item.averageRating)
+        holder.ratingView.text = rounded
     }
 
 }
