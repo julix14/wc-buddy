@@ -15,7 +15,7 @@
             app:title="@string/preferences_zoom_level_title"
             app:summary="@string/preferences_zoom_level_summary"
             app:entries="@array/preferences_zoom_level_entries"
-            app:entryValues="@array/preferences_zoom_level_keys"
+            app:entryValues="@array/preferences_zoom_level_values"
             app:defaultValue="14" />
 
     </PreferenceCategory>

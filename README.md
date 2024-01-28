@@ -38,7 +38,36 @@ to existing features and addressed several bugs.
 
 ## Validation & Testing
 
-Not done yet.
+## Validation of the Idea
+
+We validated our idea by asking some friends and co-students if they would use an app that helps
+them to find a toilet in Berlin and which features they would like to have in such an app.
+After we got positive feedback, we started with the creation of the first wireframes. We again asked
+for feedback and made some changes to the wireframes. One Change was for example the addition of the
+icons to the not extended version of the bottom sheet, to see some information about the toilet
+without extending the bottom sheet.
+After gathering feedback for the wireframes, we started with the implementation of the app.
+
+## Testing during the Development Process
+
+During the development process, we tested our features most of the time on the emulated version of
+the Pixel 6 with API 34.
+But we also installed it on a real Pixel 7 to see if everything works as expected.
+
+## Code Validation
+
+Next to the known process of code reviews on GitHub, we also used SonarCloud to check our code for
+bugs and code smells.
+This means that before a pull request was merged, it was automatically checked by SonarCloud and the
+results were posted in the pull request and only if the results were good, we were able to merge the
+pull request.
+
+## Final User Testing
+
+After the implementation of all features, we asked some friends to test the app and give us
+feedback.
+After this feedback, we made some changes to the app. For example, we adapted some translations
+because they were misleading to the testers.
 
 ## Team Work
 
