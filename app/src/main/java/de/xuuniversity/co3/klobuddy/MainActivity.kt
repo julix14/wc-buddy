@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
+import de.xuuniversity.co3.klobuddy.favorite.FavoritesAdapter
+import de.xuuniversity.co3.klobuddy.favorite.FavoritesFragment
 import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
@@ -44,7 +46,6 @@ class MainActivity : AppCompatActivity(), FavoritesAdapter.FavoritesAdapterCallb
         setContentView(binding.root)
         Log.d("Login", "User ID: ${StatesSingleton.userId}")
 
-        // Todo: Julius, is this placement right?
         lifecycleScope.launch {
             WcRepository.upsertWcEntitiesFromFireStore(this@MainActivity)
             WcRepository.upsertUserFavoritesFromFireStore(this@MainActivity)

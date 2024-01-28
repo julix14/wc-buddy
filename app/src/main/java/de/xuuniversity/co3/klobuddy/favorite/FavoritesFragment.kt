@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy
+package de.xuuniversity.co3.klobuddy.favorite
 
 import android.content.Context
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import de.xuuniversity.co3.klobuddy.R
 import de.xuuniversity.co3.klobuddy.singletons.RoomDatabaseSingleton
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import kotlinx.coroutines.launch

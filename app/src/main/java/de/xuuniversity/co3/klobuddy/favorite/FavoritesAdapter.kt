@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy
+package de.xuuniversity.co3.klobuddy.favorite
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -12,6 +12,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import de.xuuniversity.co3.klobuddy.R
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcEntity
 
@@ -21,7 +22,7 @@ class FavoritesAdapter(
     private val context: Context,
     private val callback: FavoritesAdapterCallback
 ): RecyclerView.Adapter<FavoritesViewHolder>() {
-    interface FavoritesAdapterCallback {
+    fun interface FavoritesAdapterCallback {
         fun onNavigateToMap()
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoritesViewHolder {
