@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy
+package de.xuuniversity.co3.klobuddy.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
+import de.xuuniversity.co3.klobuddy.R
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.favorite.FavoritesAdapter
 import de.xuuniversity.co3.klobuddy.fragments.FavoritesFragment

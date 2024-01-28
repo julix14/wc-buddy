@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <permission
+        android:name="de.xuuniversity.co3.klobuddy.PERMISSION_LOGIN"
+        android:protectionLevel="signature" />
+    <permission
+        android:name="de.xuuniversity.co3.klobuddy.PERMISSION_MAIN"
+        android:protectionLevel="signature" />
+
 
     <application
         android:name=".MyApp"
@@ -17,17 +24,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KloBuddy"
+        android:usesCleartextTraffic="false"
         tools:targetApi="31">
         <activity
-            android:name=".LoginActivity"
-            android:exported="true" />
+            android:name=".activities.LoginActivity"
+            android:exported="true"
+            android:permission="de.xuuniversity.co3.klobuddy.PERMISSION_LOGIN" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
