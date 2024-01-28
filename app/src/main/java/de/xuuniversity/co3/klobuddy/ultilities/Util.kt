@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy
+package de.xuuniversity.co3.klobuddy.ultilities
 
 import android.content.Context
 import android.graphics.Bitmap
