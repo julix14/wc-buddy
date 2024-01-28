@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy.preferences
+package de.xuuniversity.co3.klobuddy.fragments
 
 import android.app.AlertDialog
 import android.content.SharedPreferences

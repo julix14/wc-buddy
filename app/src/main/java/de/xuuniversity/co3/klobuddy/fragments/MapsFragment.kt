@@ -1,4 +1,4 @@
-package de.xuuniversity.co3.klobuddy
+package de.xuuniversity.co3.klobuddy.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.clustering.ClusterManager
+import de.xuuniversity.co3.klobuddy.R
 import de.xuuniversity.co3.klobuddy.databinding.FragmentMapsBinding
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.ultilities.Util

@@ -12,8 +12,9 @@ import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
 import de.xuuniversity.co3.klobuddy.databinding.ActivityMainBinding
 import de.xuuniversity.co3.klobuddy.favorite.FavoritesAdapter
-import de.xuuniversity.co3.klobuddy.favorite.FavoritesFragment
-import de.xuuniversity.co3.klobuddy.preferences.SettingsFragment
+import de.xuuniversity.co3.klobuddy.fragments.FavoritesFragment
+import de.xuuniversity.co3.klobuddy.fragments.MapsFragment
+import de.xuuniversity.co3.klobuddy.fragments.SettingsFragment
 import de.xuuniversity.co3.klobuddy.singletons.StatesSingleton
 import de.xuuniversity.co3.klobuddy.wc.WcRepository
 import kotlinx.coroutines.launch
