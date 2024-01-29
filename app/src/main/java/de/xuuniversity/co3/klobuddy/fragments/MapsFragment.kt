@@ -416,7 +416,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
 
         //Price
-        if ((wc.price == null) || (wc.price.equals(0.0))) {
+        if ((wc.price == null) || (wc.price == 0.0)) {
             view?.findViewById<TextView>(R.id.wc_bottom_sheet_price)?.text =
                 getString(R.string.no_fee)
         } else {
